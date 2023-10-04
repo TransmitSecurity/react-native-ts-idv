@@ -17,6 +17,19 @@ const TsIdv = NativeModules.TsIdv
       }
     );
 
-export function multiply(a: number, b: number): Promise<number> {
-  return TsIdv.multiply(a, b);
+class IdentityVerification {
+
+    public initialize = async (clientId: string, baseUrl: string = ""): Promise<void> => {
+      return TsIdv.initialize(clientId, baseUrl);
+    }
+
+    public startIdentityVerification = async (startToken: string): Promise<void> => {
+      return TsIdv.startIdentityVerification(startToken);
+    }
+
+    public recapture = async (): Promise<void> => {
+      return TsIdv.recapture();
+    }
+      
 }
+export default new IdentityVerification();
