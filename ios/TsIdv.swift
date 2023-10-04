@@ -27,10 +27,10 @@ class TsIdv: RCTEventEmitter {
         super.init()
     }
     
-    @objc(initialize:withResolver:withRejecter:)
-    func initialize(_ clientId: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
+    @objc(initialize:withBaseUrl:withResolver:withRejecter:)
+    func initialize(_ clientId: String, baseUrl: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
         runBlockOnMain {
-            TSIdentityVerification.initialize(clientId: clientId)
+            TSIdentityVerification.initialize(baseUrl: baseUrl, clientId: clientId)
             TSIdentityVerification.delegate = self
             
             resolve(true)
@@ -98,7 +98,7 @@ extension TsIdv: TSIdentityVerificationDelegate {
     }
     
     func verificationDidFail(with error: TSIdentityVerificationError) {
-        reportIDVStatusChange(.verificationDidFail, additionalData: String(describing: error))
+        reportIDVStatusChange(.verificationDidFail, additionalData: ["error": String(describing: error)])
     }
     
     func verificationDidStartCapturing() {

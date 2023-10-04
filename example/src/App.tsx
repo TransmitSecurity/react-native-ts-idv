@@ -12,6 +12,7 @@ import MockServer, { AccessTokenResponse, VerificationResultsResponse, Verificat
 import config from './config';
 import VerificationResultsDialog from './verification-results-dialog';
 import RequireRecaptureDialog from './require-recapture-dialog';
+import IdentityVerification, { TSIDV } from 'react-native-ts-idv';
 
 const { TsIdv } = NativeModules;
 const eventEmitter = new NativeEventEmitter(TsIdv);
@@ -77,7 +78,7 @@ export default class App extends React.Component<any, State> {
 
   private onRecapture = (): void => {
     this.setState({ isRecaptureModalVisible: false });
-    TsIdv.recapture();
+    IdentityVerification.recapture();
   }
 
   private renderProcessing = (): any => {
@@ -96,7 +97,7 @@ export default class App extends React.Component<any, State> {
     try {
       const accessToken = this.accessTokenResponse?.token || "";
       this.verificationSession = await this.mockServer.createVerificationSession(accessToken);
-      await TsIdv.startIdentityVerification(this.verificationSession.startToken);
+      await IdentityVerification.startIdentityVerification(this.verificationSession.startToken);
 
       this.logAppEvent("Started identity verification process");
     } catch (error) {
@@ -126,7 +127,7 @@ export default class App extends React.Component<any, State> {
   }
 
   private onAppReady = async (): Promise<void> => {
-    TsIdv.initialize(config.clientId);
+    IdentityVerification.initialize(config.clientId);
     this.registerForEvents();
 
     try {
@@ -174,7 +175,8 @@ export default class App extends React.Component<any, State> {
         await this.handleIdentityVerificationComplete();
         break;
       case VerificationStatus.verificationDidFail:
-        this.setState({ errorMessage: `Verification Failed: ${additionalData}`, isProcessing: false });
+        const error: TSIDV.IdentityVerificationError = additionalData["error"];
+        this.setState({ errorMessage: `Verification Failed: ${error}`, isProcessing: false });
         this.logAppEvent(`verificationDidFail`);
         break;
       case VerificationStatus.verificationDidStartCapturing:
