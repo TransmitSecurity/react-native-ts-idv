@@ -1,5 +1,5 @@
 import React, { ReactElement } from 'react';
-import { Button, StyleSheet, Text, View, Platform, PermissionsAndroid } from 'react-native';
+import { Button, StyleSheet, Text, View } from 'react-native';
 
 export type Props = {
     onStartIDV: () => void;
@@ -11,7 +11,6 @@ const HomeScreen: React.FC<Props> = ({ onStartIDV, errorMessage }) => {
     return (
         <View style={styles.container}>
             <Text style={styles.sectionTitle}>{"Identinty Verification"}</Text>
-            { Platform.OS === "android" ? renderAndroidCameraPermission() : null }
             { renderStartIDVButton() }
             { renderStatusLabel() }
         </View>
@@ -34,47 +33,6 @@ const HomeScreen: React.FC<Props> = ({ onStartIDV, errorMessage }) => {
                 />
             </View>
         )
-    }
-
-    function renderAndroidCameraPermission(): ReactElement {
-        return (
-            <View>
-                <Text style={styles.sectionDescription}>Identity document verification requires camera permissions</Text>
-                <View style={{ paddingHorizontal: 22 }} >
-                    <Button title="request permissions" onPress={requestCameraPermission} />
-                </View>
-            </View>
-        )
-    }
-};
-
-const requestCameraPermission = async () => {
-    const hasCameraPermission = await PermissionsAndroid.check(
-        PermissionsAndroid.PERMISSIONS.CAMERA)
-
-    if (!hasCameraPermission) {
-        try {
-            console.log('start request Camera Permission');
-            const granted = await PermissionsAndroid.request(
-                PermissionsAndroid.PERMISSIONS.CAMERA,
-                {
-                    title: 'IDV Camera Permission',
-                    message:
-                        'App needs access to your camera ' +
-                        'so you can take picturesof your ID.',
-                    buttonNeutral: 'Ask Me Later',
-                    buttonNegative: 'Cancel',
-                    buttonPositive: 'OK',
-                },
-            );
-            if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-                console.log('You can use the camera');
-            } else {
-                console.log('Camera permission denied');
-            }
-        } catch (err) {
-            console.warn(err);
-        }
     }
 };
 

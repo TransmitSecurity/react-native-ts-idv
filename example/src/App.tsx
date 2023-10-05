@@ -13,6 +13,7 @@ import config from './config';
 import VerificationResultsDialog from './verification-results-dialog';
 import RequireRecaptureDialog from './require-recapture-dialog';
 import IdentityVerification, { TSIDV } from 'react-native-ts-idv';
+import {request, PERMISSIONS} from 'react-native-permissions';
 
 const { TsIdv } = NativeModules;
 const eventEmitter = new NativeEventEmitter(TsIdv);
@@ -76,6 +77,12 @@ export default class App extends React.Component<any, State> {
     );
   }
 
+  private requestCameraPermissions = (): void => {
+    request(PERMISSIONS.IOS.CAMERA).then((result) => {
+        console.log(`Requested camera permissions. Result: ${result}`);
+    });
+}
+
   private onRecapture = (): void => {
     this.setState({ isRecaptureModalVisible: false });
     IdentityVerification.recapture();
@@ -129,7 +136,8 @@ export default class App extends React.Component<any, State> {
   private onAppReady = async (): Promise<void> => {
     IdentityVerification.initialize(config.clientId);
     this.registerForEvents();
-
+    this.requestCameraPermissions();
+    
     try {
       this.accessTokenResponse = await this.mockServer.getAccessToken();
     } catch (error) {
