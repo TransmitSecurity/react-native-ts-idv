@@ -16,7 +16,44 @@ const TsIdv = NativeModules.TsIdv
         },
       }
     );
+ 
 
-export function multiply(a: number, b: number): Promise<number> {
-  return TsIdv.multiply(a, b);
+export namespace TSIDV {
+	export const enum IdentityVerificationError {
+		cameraPermissionRequired,
+		sdkDisabled,
+		sessionNotValid,
+		verificationStatusError,
+		recaptureNotRequired,
+		genericServerError,
+		networkError
+	}
+
+	export const enum BaseURL {
+		us = "https://api.transmitsecurity.io/verify",
+		eu = "https://api.eu.transmitsecurity.io/verify"
+	}
 }
+
+export interface TSIdentityVerificationModule {
+    initialize: (clientId: string, baseUrl: TSIDV.BaseURL) => Promise<void>;
+    startIdentityVerification: (startToken: string) => Promise<void>;
+    recapture: () => Promise<void>;
+}
+
+class IdentityVerification implements TSIdentityVerificationModule {
+
+    public initialize = async (clientId: string, baseUrl: TSIDV.BaseURL = TSIDV.BaseURL.us): Promise<void> => {
+      return TsIdv.initialize(clientId, baseUrl);
+    }
+
+    public startIdentityVerification = async (startToken: string): Promise<void> => {
+      return TsIdv.startIdentityVerification(startToken);
+    }
+
+    public recapture = async (): Promise<void> => {
+      return TsIdv.recapture();
+    }
+      
+}
+export default new IdentityVerification();
