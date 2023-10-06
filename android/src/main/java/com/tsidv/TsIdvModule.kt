@@ -4,6 +4,8 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.Promise
+import com.transmit.identityverification.TSIdentityVerification
+import timber.log.Timber
 
 class TsIdvModule(reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
@@ -12,12 +14,18 @@ class TsIdvModule(reactContext: ReactApplicationContext) :
     return NAME
   }
 
-  // Example method
-  // See https://reactnative.dev/docs/native-modules-android
+  // region IDV SDK API
+
   @ReactMethod
-  fun multiply(a: Double, b: Double, promise: Promise) {
-    promise.resolve(a * b)
+  fun initialize(clientId: String, baseURL: String) {
+    Timber.d(">>> initialize")
+//    TSIdentityVerification.initialize(reactContext, clientId)
+//    registerForStatus(this)
   }
+
+
+  //endregion
+
 
   companion object {
     const val NAME = "TsIdv"

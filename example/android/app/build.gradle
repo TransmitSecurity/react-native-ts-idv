@@ -124,4 +124,7 @@ apply from: file("../../node_modules/@react-native-community/cli-platform-androi
 
 repositories {
   google()
+  maven {
+    url('https://transmit.jfrog.io/artifactory/transmit-security-gradle-release-local/')
+  }
 }

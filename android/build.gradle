@@ -98,10 +98,19 @@ dependencies {
   // For < 0.71, this will be from the local maven repo
   // For > 0.71, this will be replaced by `com.facebook.react:react-android:$version` by react gradle plugin
   //noinspection GradleDynamicVersion
-//  implementation("com.ts.sdk:identityverification:1.0.5")
+  implementation("com.ts.sdk:identityverification:1.0.5")
   implementation "com.facebook.react:react-native:+"
-  implementation "org.jetbrains.kotlin:kotlin-stdlib:1.7.22"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.10"
   implementation "com.jakewharton.timber:timber:4.7.1"
+
+  constraints {
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0") {
+      because("kotlin-stdlib-jdk7 is now a part of kotlin-stdlib")
+    }
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0") {
+      because("kotlin-stdlib-jdk8 is now a part of kotlin-stdlib")
+    }
+  }
 }
 
 if (isNewArchitectureEnabled()) {
