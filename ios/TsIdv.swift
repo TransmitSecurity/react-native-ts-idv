@@ -32,7 +32,6 @@ class TsIdv: RCTEventEmitter {
         runBlockOnMain {
             TSIdentityVerification.initialize(baseUrl: baseUrl, clientId: clientId)
             TSIdentityVerification.delegate = self
-            
             resolve(true)
         }
     }
@@ -110,6 +109,6 @@ extension TsIdv: TSIdentityVerificationDelegate {
     }
     
     func verificationRequiresRecapture(reason: TSRecaptureReason) {
-        reportIDVStatusChange(.verificationRequiresRecapture, additionalData: reason.description)
+        reportIDVStatusChange(.verificationRequiresRecapture, additionalData: ["error": reason.description])
     }
 }

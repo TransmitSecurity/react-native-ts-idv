@@ -196,7 +196,8 @@ export default class App extends React.Component<any, State> {
         this.setState({ errorMessage: ``, isProcessing: true });
         break;
       case VerificationStatus.verificationRequiresRecapture:
-        this.setState({ errorMessage: `Require Recapture: ${additionalData}`, isProcessing: false, isRecaptureModalVisible: true });
+        const reason: string = additionalData["error"];
+        this.setState({ errorMessage: `Require Recapture: ${reason}`, isProcessing: false, isRecaptureModalVisible: true });
         this.logAppEvent(`verificationRequiresRecapture: ${additionalData}`);
         break;
       default:
