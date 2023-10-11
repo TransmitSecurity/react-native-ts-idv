@@ -489,7 +489,7 @@
 				DEVELOPMENT_TEAM = M3RV2Q6B99;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = TsIdvExample/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Identity Verification";
+				INFOPLIST_KEY_CFBundleDisplayName = "ID Verification";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -501,7 +501,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.transmitsecurity.tsidv-example";
 				PRODUCT_NAME = TsIdvExample;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -518,7 +518,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = M3RV2Q6B99;
 				INFOPLIST_FILE = TsIdvExample/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Identity Verification";
+				INFOPLIST_KEY_CFBundleDisplayName = "ID Verification";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -530,7 +530,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.transmitsecurity.tsidv-example";
 				PRODUCT_NAME = TsIdvExample;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";

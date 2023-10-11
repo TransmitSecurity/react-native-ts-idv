@@ -29,3 +29,11 @@ MIT
 ---
 
 Made with [create-react-native-library](https://github.com/callstack/react-native-builder-bob)
+
+Add to app/build.gradle under repositories
+
+    maven {
+      url('https://transmit.jfrog.io/artifactory/transmit-security-gradle-release-local/')
+    }
+
+    need to register to event in the js app
