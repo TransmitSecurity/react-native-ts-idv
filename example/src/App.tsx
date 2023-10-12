@@ -1,19 +1,22 @@
 /**
- * Sample React Native App
- * https://github.com/facebook/react-native
+ * React Native - Identity Verification example
+ * Transmit Security, https://github.com/TransmitSecurity
  *
  * @format
  */
 
 import React from 'react';
 import { NativeModules, NativeEventEmitter, SafeAreaView, EmitterSubscription, ActivityIndicator, View, StyleSheet } from 'react-native';
-import HomeScreen from './home';
+import {request, PERMISSIONS} from 'react-native-permissions';
+
+import IdentityVerification, { TSIDV } from 'react-native-ts-idv';
 import MockServer, { AccessTokenResponse, VerificationResultsResponse, VerificationSessionResponse } from './services/mock_server';
-import config from './config';
+
+import HomeScreen from './home';
 import VerificationResultsDialog from './verification-results-dialog';
 import RequireRecaptureDialog from './require-recapture-dialog';
-import IdentityVerification, { TSIDV } from 'react-native-ts-idv';
-import {request, PERMISSIONS} from 'react-native-permissions';
+
+import config from './config';
 
 const { TsIdv } = NativeModules;
 const eventEmitter = new NativeEventEmitter(TsIdv);
