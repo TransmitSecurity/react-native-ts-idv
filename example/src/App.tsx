@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { NativeModules, NativeEventEmitter, SafeAreaView, EmitterSubscription, ActivityIndicator, View, StyleSheet } from 'react-native';
-import {request, PERMISSIONS} from 'react-native-permissions';
+import { request, PERMISSIONS } from 'react-native-permissions';
 
 import IdentityVerification, { TSIDV } from 'react-native-ts-idv';
 import MockServer, { AccessTokenResponse, VerificationResultsResponse, VerificationSessionResponse } from './services/mock_server';
@@ -82,9 +82,9 @@ export default class App extends React.Component<any, State> {
 
   private requestCameraPermissions = (): void => {
     request(PERMISSIONS.IOS.CAMERA).then((result) => {
-        console.log(`Requested camera permissions. Result: ${result}`);
+      console.log(`Requested camera permissions. Result: ${result}`);
     });
-}
+  }
 
   private onRecapture = (): void => {
     this.setState({ isRecaptureModalVisible: false });
@@ -140,7 +140,7 @@ export default class App extends React.Component<any, State> {
     IdentityVerification.initialize(config.clientId);
     this.registerForEvents();
     this.requestCameraPermissions();
-    
+
     try {
       this.accessTokenResponse = await this.mockServer.getAccessToken();
     } catch (error) {

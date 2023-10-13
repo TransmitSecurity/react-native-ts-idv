@@ -36,14 +36,16 @@ npm install react-native-ts-idv
 ```
 
 #### iOS Setup
-You might need to execute `pod install` in your project's `/ios` folder.
+You might need to execute `pod install` in your project's `/ios` folder and set your minimum iOS target to 13.0 in your Podfile (e.g `platform :ios, 13.0`).
 
 #### Android Setup
 Add to `app/build.gradle` under repositories
 
 ```gradle
-maven {
+repositories {
+  maven {
     url('https://transmit.jfrog.io/artifactory/transmit-security-gradle-release-local/')
+  }
 }
 ```
 
@@ -55,7 +57,7 @@ For module usage, configuring permissions for the device camera on both iOS and 
 #### Module Setup
 ```js
 import IdentityVerification, { TSIDV } from 'react-native-ts-idv';
-const { TsIdv } = NativeModules;
+const { TsIdv } = NativeModules; // Import NativeModules and NativeEventEmitter from 'react-native'
 const eventEmitter = new NativeEventEmitter(TsIdv); // Create an event emitter with the native module TsIdv
 
 private verificationStatusChangeSub?: EmitterSubscription; // Imported from react-native
@@ -100,6 +102,15 @@ onStartVerificationProcess = async (): Promise<void> => {
 
 #### Handle status changes
 ```js
+const enum VerificationStatus {
+  verificationDidCancel = "verificationDidCancel",
+  verificationDidComplete = "verificationDidComplete",
+  verificationDidFail = "verificationDidFail",
+  verificationDidStartCapturing = "verificationDidStartCapturing",
+  verificationDidStartProcessing = "verificationDidStartProcessing",
+  verificationRequiresRecapture = "verificationRequiresRecapture",
+}
+
 private onVerificationStatusChange = (params: any) => {
     const status = params["status"];
     const additionalData = params["additionalData"];
@@ -112,6 +123,7 @@ private onVerificationStatusChange = (params: any) => {
             console.log(`verificationDidComplete`);
             break;
         case VerificationStatus.verificationDidFail:
+            const error: string = additionalData["error"];
             console.log(`verificationDidFail: ${error}`);
             break;
         case VerificationStatus.verificationDidStartCapturing:
@@ -128,7 +140,6 @@ private onVerificationStatusChange = (params: any) => {
             console.log(`Unhandled verification status: ${status}`);
     }
 }
-
 ```
 
 #### Obtaining verification results
