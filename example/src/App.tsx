@@ -6,14 +6,15 @@
  */
 
 import React from 'react';
-import { NativeModules, NativeEventEmitter, SafeAreaView, EmitterSubscription, ActivityIndicator, View, StyleSheet } from 'react-native';
+import { NativeModules, NativeEventEmitter, SafeAreaView, EmitterSubscription, ActivityIndicator, View, StyleSheet, Platform } from 'react-native';
 import HomeScreen from './home';
 import MockServer, { AccessTokenResponse, VerificationResultsResponse, VerificationSessionResponse } from './services/mock_server';
 import config from './config';
 import VerificationResultsDialog from './verification-results-dialog';
 import RequireRecaptureDialog from './require-recapture-dialog';
 import IdentityVerification, { TSIDV } from 'react-native-ts-idv';
-import {request, PERMISSIONS} from 'react-native-permissions';
+import { request, PERMISSIONS } from 'react-native-permissions';
+
 
 const { TsIdv } = NativeModules;
 const eventEmitter = new NativeEventEmitter(TsIdv);
@@ -78,10 +79,18 @@ export default class App extends React.Component<any, State> {
   }
 
   private requestCameraPermissions = (): void => {
-    request(PERMISSIONS.IOS.CAMERA).then((result) => {
+    if (Platform.OS === "android") {
+      request(PERMISSIONS.ANDROID.CAMERA).then((result) => {
         console.log(`Requested camera permissions. Result: ${result}`);
-    });
-}
+      });
+    } else if (Platform.OS === "ios"){
+      request(PERMISSIONS.IOS.CAMERA).then((result) => {
+        console.log(`Requested camera permissions. Result: ${result}`);
+      });
+    } else {
+      console.error("Unsupported platform");
+    }
+  }
 
   private onRecapture = (): void => {
     this.setState({ isRecaptureModalVisible: false });
@@ -137,7 +146,7 @@ export default class App extends React.Component<any, State> {
     IdentityVerification.initialize(config.clientId);
     this.registerForEvents();
     this.requestCameraPermissions();
-    
+
     try {
       this.accessTokenResponse = await this.mockServer.getAccessToken();
     } catch (error) {
