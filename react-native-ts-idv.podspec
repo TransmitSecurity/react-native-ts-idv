@@ -12,7 +12,7 @@ Pod::Spec.new do |s|
   s.authors      = package["author"]
 
   s.platforms    = { :ios => "13.0" }
-  s.source       = { :git => "https://github.com/shachartransmit/react-native-ts-idv.git", :tag => "#{s.version}" }
+  s.source       = { :git => "hhttps://github.com/TransmitSecurity/react-native-ts-idv", :tag => "#{s.version}" }
 
   s.dependency 'IdentityVerification', '~> 1.0.6'
   s.source_files = "ios/**/*.{h,m,mm,swift}"
