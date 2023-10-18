@@ -379,7 +379,7 @@ PODS:
   - React-jsinspector (0.72.5)
   - React-logger (0.72.5):
     - glog
-  - react-native-ts-idv (0.1.0):
+  - react-native-ts-idv (1.0.0):
     - IdentityVerification (~> 1.0.6)
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
@@ -493,7 +493,7 @@ PODS:
     - React-jsi (= 0.72.5)
     - React-logger (= 0.72.5)
     - React-perflogger (= 0.72.5)
-  - RNPermissions (3.9.3):
+  - RNPermissions (3.10.0):
     - React-Core
   - SocketRocket (0.6.1)
   - TSCoreSDK (1.0.14)
@@ -565,7 +565,7 @@ DEPENDENCIES:
   - React-runtimescheduler (from `../node_modules/react-native/ReactCommon/react/renderer/runtimescheduler`)
   - React-utils (from `../node_modules/react-native/ReactCommon/react/utils`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
-  - RNPermissions (from `../../node_modules/react-native-permissions`)
+  - RNPermissions (from `../node_modules/react-native-permissions`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -669,7 +669,7 @@ EXTERNAL SOURCES:
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
   RNPermissions:
-    :path: "../../node_modules/react-native-permissions"
+    :path: "../node_modules/react-native-permissions"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
@@ -709,7 +709,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: ff70a72027dea5cc7d71cfcc6fad7f599f63987a
   React-jsinspector: aef73cbd43b70675f572214d10fa438c89bf11ba
   React-logger: 2e4aee3e11b3ec4fa6cfd8004610bbb3b8d6cca4
-  react-native-ts-idv: c2f88cb5b96092810349014b4b61d9df61aa6baf
+  react-native-ts-idv: a4e486269dc4d77067f6205f8c1cf633aa6940c2
   React-NativeModulesApple: 797bc6078d566eef3fb3f74127e6e1d2e945a15f
   React-perflogger: cd8886513f68e1c135a1e79d20575c6489641597
   React-RCTActionSheet: 726d2615ca62a77ce3e2c13d87f65379cdc73498
@@ -727,7 +727,7 @@ SPEC CHECKSUMS:
   React-runtimescheduler: cc32add98c45c5df18436a6a52a7e1f6edec102c
   React-utils: 7a9918a1ffdd39aba67835d42386f592ea3f8e76
   ReactCommon: 91ece8350ebb3dd2be9cef662abd78b6948233c0
-  RNPermissions: 3f309649cc77f3602565c5af0a8a718738175519
+  RNPermissions: eae8b97d8ab0587f082966ee608f47c97b2a349b
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   TSCoreSDK: 1a6adee7fd20634895fd1a5f13d1ed754f2676cb
   Yoga: 86fed2e4d425ee4c6eab3813ba1791101ee153c6

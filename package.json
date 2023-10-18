@@ -40,13 +40,13 @@
     "ios",
     "android"
   ],
-  "repository": "https://github.com/shachartransmit/react-native-ts-idv",
+  "repository": "https://github.com/TransmitSecurity/react-native-ts-idv",
   "author": "Transmit Security <shachar@transmitsecurity.com> (https://github.com/shachartransmit)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/shachartransmit/react-native-ts-idv/issues"
+    "url": "https://github.com/TransmitSecurity/react-native-ts-idv/issues"
   },
-  "homepage": "https://github.com/shachartransmit/react-native-ts-idv#readme",
+  "homepage": "https://github.com/TransmitSecurity/react-native-ts-idv#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
