@@ -145,6 +145,10 @@ export default class App extends React.Component<any, State> {
   }
 
   private onAppReady = async (): Promise<void> => {
+    if (!this.isAppConfigured()) {
+      this.logAppEvent("Error: This code requires configuration of the App's Client ID and Secret. Please set the values in config.ts before proceeding.");
+      return;
+    }
     IdentityVerification.initialize(config.clientId);
     this.registerForEvents();
     this.requestCameraPermissions();
@@ -154,6 +158,10 @@ export default class App extends React.Component<any, State> {
     } catch (error) {
       this.setState({ errorMessage: `${error}` });
     }
+  }
+
+  private isAppConfigured = (): boolean => {
+    return !(config.clientId === "REPLACE_WITH_CLIENT_ID" || config.secret === "REPLACE_WITH_SECRET");
   }
 
   // Event Emitter
