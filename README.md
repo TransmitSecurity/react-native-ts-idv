@@ -48,6 +48,12 @@ repositories {
   }
 }
 ```
+Note:  
+As for projects on Gradle 8+ and Kotlin 1.8+ build will fail if the JDK version between 
+compileKotlin and compileJava and jvmTarget are not aligned. 
+
+This won't be necessary anymore from React Native 0.73. More on this:
+https://kotlinlang.org/docs/whatsnew18.html#obligatory-check-for-jvm-targets-of-related-kotlin-and-java-compile-tasks
 
 ## Add camera permission
 For module usage, configuring permissions for the device camera on both iOS and Android is necessary. You must also explicitly request user permission before commencing the identity verification process. See the `/example` project to learn more.

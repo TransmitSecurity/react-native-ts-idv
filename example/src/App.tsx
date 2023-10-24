@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { NativeModules, NativeEventEmitter, SafeAreaView, EmitterSubscription, ActivityIndicator, View, StyleSheet } from 'react-native';
+import { NativeModules, NativeEventEmitter, SafeAreaView, EmitterSubscription, ActivityIndicator, View, StyleSheet, Platform } from 'react-native';
 import { request, PERMISSIONS } from 'react-native-permissions';
 
 import IdentityVerification, { TSIDV } from 'react-native-ts-idv';
@@ -81,9 +81,17 @@ export default class App extends React.Component<any, State> {
   }
 
   private requestCameraPermissions = (): void => {
-    request(PERMISSIONS.IOS.CAMERA).then((result) => {
-      console.log(`Requested camera permissions. Result: ${result}`);
-    });
+    if (Platform.OS === "android") {
+      request(PERMISSIONS.ANDROID.CAMERA).then((result) => {
+        console.log(`Requested camera permissions. Result: ${result}`);
+      });
+    } else if (Platform.OS === "ios"){
+      request(PERMISSIONS.IOS.CAMERA).then((result) => {
+        console.log(`Requested camera permissions. Result: ${result}`);
+      });
+    } else {
+      console.error("Unsupported platform");
+    }
   }
 
   private onRecapture = (): void => {
@@ -137,6 +145,10 @@ export default class App extends React.Component<any, State> {
   }
 
   private onAppReady = async (): Promise<void> => {
+    if (!this.isAppConfigured()) {
+      this.logAppEvent("Error: This code requires configuration of the App's Client ID and Secret. Please set the values in config.ts before proceeding.");
+      return;
+    }
     IdentityVerification.initialize(config.clientId);
     this.registerForEvents();
     this.requestCameraPermissions();
@@ -146,6 +158,10 @@ export default class App extends React.Component<any, State> {
     } catch (error) {
       this.setState({ errorMessage: `${error}` });
     }
+  }
+
+  private isAppConfigured = (): boolean => {
+    return !(config.clientId === "REPLACE_WITH_CLIENT_ID" || config.secret === "REPLACE_WITH_SECRET");
   }
 
   // Event Emitter
