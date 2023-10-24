@@ -32,6 +32,7 @@
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
     "prepack": "bob build",
+    "prepare": "bob build",
     "release": "release-it",
     "example": "yarn workspace react-native-ts-idv-example"
   },
@@ -40,13 +41,13 @@
     "ios",
     "android"
   ],
-  "repository": "https://github.com/shachartransmit/react-native-ts-idv",
+  "repository": "https://github.com/TransmitSecurity/react-native-ts-idv",
   "author": "Transmit Security <shachar@transmitsecurity.com> (https://github.com/shachartransmit)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/shachartransmit/react-native-ts-idv/issues"
+    "url": "https://github.com/TransmitSecurity/react-native-ts-idv/issues"
   },
-  "homepage": "https://github.com/shachartransmit/react-native-ts-idv#readme",
+  "homepage": "https://github.com/TransmitSecurity/react-native-ts-idv#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
