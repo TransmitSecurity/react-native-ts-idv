@@ -71,8 +71,6 @@ class MockServer {
 
             const data = await resp.json();
 
-            console.log(`IDV Example: ${data}`);
-
             return {
                 startToken: data.start_token,
                 sessionId: data.session_id,
