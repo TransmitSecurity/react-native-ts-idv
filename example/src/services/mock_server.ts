@@ -1,5 +1,3 @@
-import config from "../config";
-
 export interface AccessTokenResponse {
     token: string;
     expireDate: Date;
@@ -25,17 +23,27 @@ export interface VerificationResultsResponse {
 
 class MockServer {
 
+    private baseurl: string;
+    private clientId: string;
+    private secret: string;
+
+    constructor(baseUrl: string, clientId: string, secret: string) {
+        this.baseurl = baseUrl;
+        this.clientId = clientId;
+        this.secret = secret;
+    }
+
     getAccessToken = async (): Promise<AccessTokenResponse> => {
         const formData = {
-            client_id: config.clientId, // Replace with client ID obtained in Step 1
-            client_secret: config.secret, // Replace with client secret obtained in Step 1
+            client_id: this.clientId, // Replace with client ID obtained in Step 1
+            client_secret: this.secret, // Replace with client secret obtained in Step 1
             grant_type: 'client_credentials',
             resource: 'https://verify.identity.security'
         };
 
         try {
             const resp = await fetch(
-                `${config.baseAPIURL}/oidc/token`,
+                `${this.baseurl}/oidc/token`,
                 {
                     method: 'POST',
                     headers: {
@@ -59,7 +67,7 @@ class MockServer {
 
         try {
             const resp = await fetch(
-                `${config.baseAPIURL}/verify/api/v1/verification`,
+                `${this.baseurl}/verify/api/v1/verification`,
                 {
                     method: 'POST',
                     headers: {
@@ -85,7 +93,7 @@ class MockServer {
     getVerificationResults = async (sessionId: string, accessToken: string): Promise<VerificationResultsResponse> => {
         try {
             const resp = await fetch(
-                `${config.baseAPIURL}/verify/api/v1/verification/${sessionId}/result`,
+                `${this.baseurl}/verify/api/v1/verification/${sessionId}/result`,
                 {
                     method: 'GET',
                     headers: {

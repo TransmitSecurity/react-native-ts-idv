@@ -8,6 +8,7 @@ export type Props = {
 };
 
 const RequireRecaptureDialog: React.FC<Props> = ({ isVisible, onRecapture, onDismiss }) => {
+    
     return (
         <Modal visible={isVisible} animationType="fade" transparent={true} onRequestClose={() => onDismiss()}>
             <TouchableOpacity style={styles.modalContainer}>
