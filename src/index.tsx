@@ -30,8 +30,8 @@ export namespace TSIDV {
 	}
 
 	export const enum BaseURL {
-		us = "https://api.transmitsecurity.io/verify",
-		eu = "https://api.eu.transmitsecurity.io/verify"
+		us = "https://api.transmitsecurity.io",
+		eu = "https://api.eu.transmitsecurity.io"
 	}
 }
 
