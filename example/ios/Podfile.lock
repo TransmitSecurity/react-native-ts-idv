@@ -1,6 +1,6 @@
 PODS:
-  - AccountProtection (2.0.3):
-    - TSCoreSDK (~> 1.0.10)
+  - AccountProtection (2.0.7):
+    - TSCoreSDK (~> 1.0.18)
   - boost (1.76.0)
   - CocoaAsyncSocket (7.6.5)
   - DoubleConversion (1.1.6)
@@ -75,8 +75,9 @@ PODS:
   - hermes-engine (0.72.5):
     - hermes-engine/Pre-built (= 0.72.5)
   - hermes-engine/Pre-built (0.72.5)
-  - IdentityVerification (1.0.6):
-    - AccountProtection (~> 2.0.3)
+  - IdentityVerification (1.0.10):
+    - AccountProtection (~> 2.0.7)
+    - TSCoreSDK (~> 1.0.18)
   - libevent (2.1.12)
   - OpenSSL-Universal (1.1.1100)
   - RCT-Folly (2021.07.22.00):
@@ -379,8 +380,8 @@ PODS:
   - React-jsinspector (0.72.5)
   - React-logger (0.72.5):
     - glog
-  - react-native-ts-idv (1.0.0):
-    - IdentityVerification (~> 1.0.6)
+  - react-native-ts-idv (1.0.2):
+    - IdentityVerification (= 1.0.10)
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
   - React-NativeModulesApple (0.72.5):
@@ -493,10 +494,10 @@ PODS:
     - React-jsi (= 0.72.5)
     - React-logger (= 0.72.5)
     - React-perflogger (= 0.72.5)
-  - RNPermissions (3.10.0):
+  - RNPermissions (3.9.3):
     - React-Core
   - SocketRocket (0.6.1)
-  - TSCoreSDK (1.0.14)
+  - TSCoreSDK (1.0.18)
   - Yoga (1.14.0)
   - YogaKit (1.18.1):
     - Yoga (~> 1.14)
@@ -674,7 +675,7 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  AccountProtection: 8eb760e992e743f28a1ed95b11111e6d4aad9c15
+  AccountProtection: a079133c3d1bef271a676d0c0a2b5c205ac9e2f9
   boost: 57d2868c099736d80fcd648bf211b4431e51a558
   CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
   DoubleConversion: 5189b271737e1565bdce30deb4a08d647e3f5f54
@@ -691,7 +692,7 @@ SPEC CHECKSUMS:
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
   glog: 04b94705f318337d7ead9e6d17c019bd9b1f6b1b
   hermes-engine: f6cf92a471053245614d9d8097736f6337d5b86c
-  IdentityVerification: e62005afb862cefcf49d535bb83957cc8fcc02d9
+  IdentityVerification: 8f9f485a584d3ba14fa8597c3fc609cb0800fa0b
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   OpenSSL-Universal: ebc357f1e6bc71fa463ccb2fe676756aff50e88c
   RCT-Folly: 424b8c9a7a0b9ab2886ffe9c3b041ef628fd4fb1
@@ -709,7 +710,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: ff70a72027dea5cc7d71cfcc6fad7f599f63987a
   React-jsinspector: aef73cbd43b70675f572214d10fa438c89bf11ba
   React-logger: 2e4aee3e11b3ec4fa6cfd8004610bbb3b8d6cca4
-  react-native-ts-idv: 1fe20cd5f2f04288f7360d040addd0528148e3d4
+  react-native-ts-idv: aa2e361dea680147e7e8e1b8fdea50b48bad1fd5
   React-NativeModulesApple: 797bc6078d566eef3fb3f74127e6e1d2e945a15f
   React-perflogger: cd8886513f68e1c135a1e79d20575c6489641597
   React-RCTActionSheet: 726d2615ca62a77ce3e2c13d87f65379cdc73498
@@ -727,12 +728,12 @@ SPEC CHECKSUMS:
   React-runtimescheduler: cc32add98c45c5df18436a6a52a7e1f6edec102c
   React-utils: 7a9918a1ffdd39aba67835d42386f592ea3f8e76
   ReactCommon: 91ece8350ebb3dd2be9cef662abd78b6948233c0
-  RNPermissions: eae8b97d8ab0587f082966ee608f47c97b2a349b
+  RNPermissions: 3f309649cc77f3602565c5af0a8a718738175519
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
-  TSCoreSDK: 1a6adee7fd20634895fd1a5f13d1ed754f2676cb
+  TSCoreSDK: b5a94e4cf74d0bc6e3067ef4d90ac2dd34e2f0cc
   Yoga: 86fed2e4d425ee4c6eab3813ba1791101ee153c6
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
 PODFILE CHECKSUM: 87fb0cd1433be44f24abde7e7ca844410cb0f486
 
-COCOAPODS: 1.12.1
+COCOAPODS: 1.14.2

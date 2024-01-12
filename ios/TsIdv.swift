@@ -29,8 +29,8 @@ class TsIdv: RCTEventEmitter {
     
     @objc(initialize:withBaseUrl:withResolver:withRejecter:)
     func initialize(_ clientId: String, baseUrl: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
-        runBlockOnMain {
-            TSIdentityVerification.initialize(baseUrl: baseUrl, clientId: clientId)
+        runBlockOnMain {            
+           TSIdentityVerification.initialize(baseUrl: baseUrl, clientId: clientId)
             TSIdentityVerification.delegate = self
             resolve(true)
         }
