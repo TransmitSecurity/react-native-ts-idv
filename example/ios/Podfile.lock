@@ -381,7 +381,7 @@ PODS:
   - React-logger (0.72.5):
     - glog
   - react-native-ts-idv (1.0.2):
-    - IdentityVerification (= 1.0.10)
+    - IdentityVerification (~> 1.0.10)
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
   - React-NativeModulesApple (0.72.5):
@@ -494,7 +494,7 @@ PODS:
     - React-jsi (= 0.72.5)
     - React-logger (= 0.72.5)
     - React-perflogger (= 0.72.5)
-  - RNPermissions (3.9.3):
+  - RNPermissions (3.10.1):
     - React-Core
   - SocketRocket (0.6.1)
   - TSCoreSDK (1.0.18)
@@ -710,7 +710,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: ff70a72027dea5cc7d71cfcc6fad7f599f63987a
   React-jsinspector: aef73cbd43b70675f572214d10fa438c89bf11ba
   React-logger: 2e4aee3e11b3ec4fa6cfd8004610bbb3b8d6cca4
-  react-native-ts-idv: aa2e361dea680147e7e8e1b8fdea50b48bad1fd5
+  react-native-ts-idv: aae179ba7cd50a8e7f661f2f8242cc1f373ba186
   React-NativeModulesApple: 797bc6078d566eef3fb3f74127e6e1d2e945a15f
   React-perflogger: cd8886513f68e1c135a1e79d20575c6489641597
   React-RCTActionSheet: 726d2615ca62a77ce3e2c13d87f65379cdc73498
@@ -728,7 +728,7 @@ SPEC CHECKSUMS:
   React-runtimescheduler: cc32add98c45c5df18436a6a52a7e1f6edec102c
   React-utils: 7a9918a1ffdd39aba67835d42386f592ea3f8e76
   ReactCommon: 91ece8350ebb3dd2be9cef662abd78b6948233c0
-  RNPermissions: 3f309649cc77f3602565c5af0a8a718738175519
+  RNPermissions: a446c2ce1f3bf54383c283798307cca5f50d70e4
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   TSCoreSDK: b5a94e4cf74d0bc6e3067ef4d90ac2dd34e2f0cc
   Yoga: 86fed2e4d425ee4c6eab3813ba1791101ee153c6
