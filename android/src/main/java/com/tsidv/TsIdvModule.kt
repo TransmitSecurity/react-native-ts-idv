@@ -61,6 +61,18 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
     TSIdentityVerification.recapture(activity)
   }
 
+  @ReactMethod
+  fun startFaceAuth(deviceSessionId: String, promise: Promise) {
+    Timber.d(">>> startFaceAuth")
+    if (currentActivity == null) {
+      promise.reject("Error during startFaceAuth", "currentActivity is NULL")
+      return
+    }
+    val activity = currentActivity!!
+//    TSIdentityVerification. // continue from here
+    promise.resolve(true)
+  }
+
   //endregion
 
   // region Verification Status Sending Events to JavaScript

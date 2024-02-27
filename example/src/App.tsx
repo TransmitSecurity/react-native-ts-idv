@@ -10,7 +10,7 @@ import { NativeModules, NativeEventEmitter, SafeAreaView, EmitterSubscription, A
 import { request, PERMISSIONS } from 'react-native-permissions';
 
 import IdentityVerification, { TSIDV } from 'react-native-ts-idv';
-import MockServer, { AccessTokenResponse, VerificationResultsResponse, VerificationSessionResponse } from './services/mock_server';
+import MockServer, { AccessTokenResponse, FaceAuthSessionResponse, VerificationResultsResponse, VerificationSessionResponse } from './services/mock_server';
 
 import HomeScreen from './home';
 import VerificationResultsDialog from './verification-results-dialog';
@@ -43,6 +43,7 @@ export default class App extends React.Component<any, State> {
   private mockServer: MockServer = new MockServer();
   private accessTokenResponse: AccessTokenResponse | null = null;
   private verificationSession?: VerificationSessionResponse;
+  private faceAuthSession?: FaceAuthSessionResponse;
   private verificationStatusChangeSub?: EmitterSubscription;
 
   state = {
@@ -64,7 +65,7 @@ export default class App extends React.Component<any, State> {
   render() {
     return (
       <SafeAreaView style={{ flex: 1 }}>
-        <HomeScreen onStartIDV={this.onStartVerificationProcess} errorMessage={this.state.errorMessage} />
+        <HomeScreen onStartIDV={this.onStartVerificationProcess} onStartFaceAuth={this.onStartFaceAuth} errorMessage={this.state.errorMessage} />
         <VerificationResultsDialog
           isVisible={this.state.isVerificationResultsModalVisible}
           verificationResults={this.state.verificationResultsResponse}
@@ -85,7 +86,7 @@ export default class App extends React.Component<any, State> {
       request(PERMISSIONS.ANDROID.CAMERA).then((result) => {
         console.log(`Requested camera permissions. Result: ${result}`);
       });
-    } else if (Platform.OS === "ios"){
+    } else if (Platform.OS === "ios") {
       request(PERMISSIONS.IOS.CAMERA).then((result) => {
         console.log(`Requested camera permissions. Result: ${result}`);
       });
@@ -118,6 +119,21 @@ export default class App extends React.Component<any, State> {
       await IdentityVerification.startIdentityVerification(this.verificationSession.startToken);
 
       this.logAppEvent("Started identity verification process");
+    } catch (error) {
+      this.logAppEvent(`Error verifying user identity: ${error}`);
+      this.setState({ errorMessage: `${error}` });
+    }
+  }
+
+  onStartFaceAuth = async (): Promise<void> => {
+    this.accessTokenResponse = await this.mockServer.getAccessToken();
+    const accessToken = this.accessTokenResponse?.token || "";
+    this.faceAuthSession = await this.mockServer.createFaceAuthSession(accessToken);
+
+    console.log(this.faceAuthSession)
+    try {
+      await IdentityVerification.startFaceAuth(this.faceAuthSession.deviceSessionId);
+      this.logAppEvent("Started face authentication process");
     } catch (error) {
       this.logAppEvent(`Error verifying user identity: ${error}`);
       this.setState({ errorMessage: `${error}` });
@@ -229,6 +245,22 @@ export default class App extends React.Component<any, State> {
 
   private logAppEvent = (event: string): void => {
     console.log(`IDV Example: ${event}`);
+  }
+
+  private generateUUID = (): string => { // Public Domain/MIT
+    var d = new Date().getTime();//Timestamp
+    var d2 = ((typeof performance !== 'undefined') && performance.now && (performance.now() * 1000)) || 0;//Time in microseconds since page-load or 0 if unsupported
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      var r = Math.random() * 16;//random number between 0 and 16
+      if (d > 0) {//Use timestamp until depleted
+        r = (d + r) % 16 | 0;
+        d = Math.floor(d / 16);
+      } else {//Use microseconds since page-load if supported
+        r = (d2 + r) % 16 | 0;
+        d2 = Math.floor(d2 / 16);
+      }
+      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
   }
 }
 

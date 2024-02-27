@@ -12,6 +12,11 @@ export interface VerificationSessionResponse {
     missingImages: string[];
 }
 
+export interface FaceAuthSessionResponse {
+    deviceSessionId: string;
+    sessionId: string;
+}
+
 export const enum VerificationRecomendation {
     ALLOW, CHALLENGE, DENY
 }
@@ -24,6 +29,8 @@ export interface VerificationResultsResponse {
 }
 
 class MockServer {
+
+    // MARK: - General methods
 
     getAccessToken = async (): Promise<AccessTokenResponse> => {
         const formData = {
@@ -54,6 +61,8 @@ class MockServer {
             return Promise.reject("Error in getAccessToken");
         }
     }
+
+    // MARK: -Document Verification methods
 
     createVerificationSession = async (accessToken: string): Promise<VerificationSessionResponse> => {
 
@@ -104,6 +113,43 @@ class MockServer {
             };
         } catch (error) {
             return Promise.reject("Error in getVerificationResults");
+        }
+    }
+
+    // MARK: - Face Authentication methods
+
+    createFaceAuthSession = async (accessToken: string): Promise<FaceAuthSessionResponse> => {
+        const base64RefImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAADklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII";
+        try {
+            const resp = await fetch(
+                `${config.baseAPIURL}/verify/api/v1/face-auth`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        Authorization: `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify({
+                        reference: {
+                            type: 'raw',
+                            content: base64RefImage,
+                            format: 'jpg'
+                        }
+                    })
+                }
+            );
+
+            const data = await resp.json();
+
+            console.log("createFaceAuthSession data", data)
+            console.log(data)
+
+            return {
+                deviceSessionId: data.device_session_id,
+                sessionId: data.session_id
+            };
+        } catch (error) {
+            return Promise.reject("Error in createFaceAuthSession");
         }
     }
 }

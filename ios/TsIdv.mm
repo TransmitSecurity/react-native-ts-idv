@@ -7,6 +7,8 @@ RCT_EXTERN_METHOD(initialize:(NSString *)clientId withBaseUrl:(NSString *)baseUr
 RCT_EXTERN_METHOD(startIdentityVerification:(NSString *)startToken withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(recapture:(RCTPromiseResolveBlock)resolve withRejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXTERN_METHOD(startFaceAuth:(NSString *)deviceSessionId withResolver:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
 
 + (BOOL)requiresMainQueueSetup
 {
