@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { NativeModules, NativeEventEmitter, SafeAreaView, EmitterSubscription, ActivityIndicator, View, StyleSheet, Platform } from 'react-native';
+import { NativeModules, NativeEventEmitter, SafeAreaView, EmitterSubscription, ActivityIndicator, View, StyleSheet, Platform, Alert } from 'react-native';
 import { request, PERMISSIONS } from 'react-native-permissions';
 
 import IdentityVerification, { TSIDV } from 'react-native-ts-idv';
@@ -27,6 +27,7 @@ export type State = {
   verificationResultsResponse: VerificationResultsResponse | null
   errorMessage: string;
   isProcessing: boolean;
+  lastVerificationSessionID: string | null;
 };
 
 const enum VerificationStatus {
@@ -51,7 +52,8 @@ export default class App extends React.Component<any, State> {
     isRecaptureModalVisible: false,
     verificationResultsResponse: null,
     errorMessage: "",
-    isProcessing: false
+    isProcessing: false,
+    lastVerificationSessionID: "BeSltmsId6gMzPm" //null
   }
 
   componentDidMount(): void {
@@ -65,7 +67,12 @@ export default class App extends React.Component<any, State> {
   render() {
     return (
       <SafeAreaView style={{ flex: 1 }}>
-        <HomeScreen onStartIDV={this.onStartVerificationProcess} onStartFaceAuth={this.onStartFaceAuth} errorMessage={this.state.errorMessage} />
+        <HomeScreen 
+          onStartIDV={this.onStartVerificationProcess} 
+          onStartFaceAuth={this.onStartFaceAuth}
+          isInSession={this.state.lastVerificationSessionID !== null}
+          errorMessage={this.state.errorMessage} 
+        />
         <VerificationResultsDialog
           isVisible={this.state.isVerificationResultsModalVisible}
           verificationResults={this.state.verificationResultsResponse}
@@ -126,34 +133,48 @@ export default class App extends React.Component<any, State> {
   }
 
   onStartFaceAuth = async (): Promise<void> => {
+    if (this.state.lastVerificationSessionID === null) {
+      const message = "Error: lastVerificationSessionID is null when calling onStartFaceAuth";
+      this.setState({ errorMessage: `${message}` });
+      return;
+    }
+
+    this.setState({ isProcessing: true });
     this.accessTokenResponse = await this.mockServer.getAccessToken();
     const accessToken = this.accessTokenResponse?.token || "";
-    this.faceAuthSession = await this.mockServer.createFaceAuthSession(accessToken);
+    this.faceAuthSession = await this.mockServer.createFaceAuthSession(accessToken, this.state.lastVerificationSessionID);
+    this.setState({ isProcessing: false });
 
-    console.log(this.faceAuthSession)
     try {
       await IdentityVerification.startFaceAuth(this.faceAuthSession.deviceSessionId);
       this.logAppEvent("Started face authentication process");
     } catch (error) {
       this.logAppEvent(`Error verifying user identity: ${error}`);
-      this.setState({ errorMessage: `${error}` });
+      this.setState({ errorMessage: `${error}`, isProcessing: false });
     }
   }
 
   private identityVerificationCompleted = async (sessionId: string, accessToken: string): Promise<void> => {
-    const accessTokenResponse = this.accessTokenResponse;
-    if (!accessTokenResponse) {
-      this.logAppEvent(`Access Token Response is null when calling identityVerificationCompleted`);
-      return;
-    }
-
+  
     try {
       const verificationResults = await this.mockServer.getVerificationResults(sessionId, accessToken);
-
+      
       this.setState({
         isVerificationResultsModalVisible: true,
-        verificationResultsResponse: verificationResults
+        verificationResultsResponse: verificationResults,
+        lastVerificationSessionID: sessionId
       });
+
+    } catch (error) {
+      this.setState({ errorMessage: `${error}` });
+    }
+  }
+
+  private faceVerificationCompleted = async (deviceSessionId: string, accessToken: string): Promise<void> => {
+    try {
+      const verificationResults = await this.mockServer.getFaceAuthResults(deviceSessionId, accessToken);
+      
+      Alert.alert(JSON.stringify(verificationResults));
 
     } catch (error) {
       this.setState({ errorMessage: `${error}` });
@@ -199,8 +220,18 @@ export default class App extends React.Component<any, State> {
       return;
     }
 
-    const accessToken = this.accessTokenResponse?.token || "";
+    const accessToken = this.accessTokenResponse!.token;
     await this.identityVerificationCompleted(this.verificationSession.sessionId, accessToken!);
+  }
+
+  private handleFaceAuthComplete = async (): Promise<void> => {
+    if (!this.faceAuthSession) {
+      this.logAppEvent("Face Auth Session is null on handleFaceAuthComplete");
+      return;
+    }
+
+    const accessToken = this.accessTokenResponse!.token;
+    await this.faceVerificationCompleted(this.faceAuthSession.deviceSessionId, accessToken!);
   }
 
   private onVerificationStatus = async (params: any) => {
@@ -215,7 +246,12 @@ export default class App extends React.Component<any, State> {
       case VerificationStatus.verificationDidComplete:
         this.logAppEvent(`verificationDidComplete`);
         this.setState({ errorMessage: ``, isProcessing: false });
-        await this.handleIdentityVerificationComplete();
+        
+        if (this.verificationSession) {
+          await this.handleIdentityVerificationComplete();
+        } else if (this.faceAuthSession) {
+          await this.handleFaceAuthComplete();
+        }
         break;
       case VerificationStatus.verificationDidFail:
         const error: TSIDV.IdentityVerificationError = additionalData["error"];
@@ -245,22 +281,6 @@ export default class App extends React.Component<any, State> {
 
   private logAppEvent = (event: string): void => {
     console.log(`IDV Example: ${event}`);
-  }
-
-  private generateUUID = (): string => { // Public Domain/MIT
-    var d = new Date().getTime();//Timestamp
-    var d2 = ((typeof performance !== 'undefined') && performance.now && (performance.now() * 1000)) || 0;//Time in microseconds since page-load or 0 if unsupported
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-      var r = Math.random() * 16;//random number between 0 and 16
-      if (d > 0) {//Use timestamp until depleted
-        r = (d + r) % 16 | 0;
-        d = Math.floor(d / 16);
-      } else {//Use microseconds since page-load if supported
-        r = (d2 + r) % 16 | 0;
-        d2 = Math.floor(d2 / 16);
-      }
-      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-    });
   }
 }
 

@@ -4,10 +4,11 @@ import { Button, StyleSheet, Text, View } from 'react-native';
 export type Props = {
     onStartIDV: () => void;
     onStartFaceAuth: () => void;
+    isInSession: boolean;
     errorMessage: string;
 };
 
-const HomeScreen: React.FC<Props> = ({ onStartIDV, onStartFaceAuth, errorMessage }) => {
+const HomeScreen: React.FC<Props> = ({ onStartIDV, onStartFaceAuth, isInSession, errorMessage }) => {
 
     return (
         <View style={styles.container}>
@@ -27,6 +28,7 @@ const HomeScreen: React.FC<Props> = ({ onStartIDV, onStartFaceAuth, errorMessage
     }
 
     function renderStartIDVButton(): ReactElement {
+        if (isInSession) { return <></> }
         return (
             <View style={{marginTop: 24}}>
                 <Button 
@@ -38,6 +40,8 @@ const HomeScreen: React.FC<Props> = ({ onStartIDV, onStartFaceAuth, errorMessage
     }
 
     function renderStartFaceAuthVButton(): ReactElement {
+        if (!isInSession) { return <></> }
+        
         return (
             <View style={{marginTop: 24}}>
                 <Button 
