@@ -98,14 +98,11 @@ class MockServer {
 
     getVerificationResults = async (sessionId: string, accessToken: string): Promise<VerificationResultsResponse> => {
         try {
-            const resp = await fetch(
+
+            const resp = await this.performFetchWithAccessToken(
+                accessToken, 
                 `${config.baseAPIURL}/verify/api/v1/verification/${sessionId}/result`,
-                {
-                    method: 'GET',
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`
-                    }
-                }
+                'GET', null
             );
 
             const data = await resp.json();
@@ -128,6 +125,7 @@ class MockServer {
         const base64RefImage = await this.fetchBase64PhotoByID(selfieId, sessionIdForImageRef, accessToken);
 
         try {
+
             const resp = await fetch(
                 `${config.baseAPIURL}/verify/api/v1/face-auth`,
                 {
@@ -160,14 +158,11 @@ class MockServer {
 
     getFaceAuthResults = async (deviceSessionId: string, accessToken: string): Promise<FaceVerificationResultsResponse> => {
         try {
-            const resp = await fetch(
+
+            const resp = await this.performFetchWithAccessToken(
+                accessToken, 
                 `${config.baseAPIURL}/verify/api/v1/face-auth/${deviceSessionId}/result`,
-                {
-                    method: 'GET',
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`
-                    }
-                }
+                'GET', null
             );
 
             const data = await resp.json();
@@ -233,7 +228,7 @@ class MockServer {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                     Authorization: `Bearer ${accessToken}`
-                }
+                }, body
             }
         );
 

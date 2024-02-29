@@ -53,7 +53,7 @@ export default class App extends React.Component<any, State> {
     verificationResultsResponse: null,
     errorMessage: "",
     isProcessing: false,
-    lastVerificationSessionID: "BeSltmsId6gMzPm" //null
+    lastVerificationSessionID:  null // "BeSltmsId6gMzPm"
   }
 
   componentDidMount(): void {
