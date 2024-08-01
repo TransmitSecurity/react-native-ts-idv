@@ -133,6 +133,11 @@ export default class App extends React.Component<any, State> {
   }
 
   onStartFaceAuth = async (): Promise<void> => {
+    /*
+    This feature is not supported in the current version of the module.
+    */
+
+    /*
     if (this.state.lastVerificationSessionID === null) {
       const message = "Error: lastVerificationSessionID is null when calling onStartFaceAuth";
       this.setState({ errorMessage: `${message}` });
@@ -152,6 +157,8 @@ export default class App extends React.Component<any, State> {
       this.logAppEvent(`Error verifying user identity: ${error}`);
       this.setState({ errorMessage: `${error}`, isProcessing: false });
     }
+    */
+   return;
   }
 
   private identityVerificationCompleted = async (sessionId: string, accessToken: string): Promise<void> => {

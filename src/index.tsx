@@ -39,7 +39,7 @@ export interface TSIdentityVerificationModule {
   initialize: (clientId: string, baseUrl: TSIDV.BaseURL) => Promise<void>;
   startIdentityVerification: (startToken: string) => Promise<void>;
   recapture: () => Promise<void>;
-  startFaceAuth: (deviceSessionId: string) => Promise<void>;
+  // startFaceAuth: (deviceSessionId: string) => Promise<void>;
 }
 
 class IdentityVerification implements TSIdentityVerificationModule {
@@ -56,8 +56,10 @@ class IdentityVerification implements TSIdentityVerificationModule {
     return TsIdv.recapture();
   }
 
+  /*
   public startFaceAuth = async (deviceSessionId: string): Promise<void> => {
     return TsIdv.startFaceAuth(deviceSessionId);
   }
+  */
 }
 export default new IdentityVerification();
