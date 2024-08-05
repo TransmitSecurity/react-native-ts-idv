@@ -14,7 +14,7 @@ Pod::Spec.new do |s|
   s.platforms    = { :ios => "13.0" }
   s.source       = { :git => "https://github.com/TransmitSecurity/react-native-ts-idv", :tag => "#{s.version}" }
 
-  s.dependency 'IdentityVerification', '~> 1.0.10'
+  s.dependency 'IdentityVerification', '~> 1.1.2'
   s.source_files = "ios/**/*.{h,m,mm,swift}"
 
   # Use install_modules_dependencies helper to install the dependencies if React Native version >=0.71.0.

@@ -5,5 +5,5 @@ export default {
     /*
     * Don't keep the secret on the client side. This is just an example
     */
-    secret: "REPLACE_WITH_SECRET"
+    secret: "REPLACE_WITH_SECRET",
 }

@@ -52,6 +52,14 @@ class TsIdv: RCTEventEmitter {
         }
     }
     
+    @objc(startFaceAuth:withResolver:withRejecter:)
+    func startFaceAuth(_ deviceSessionId: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
+        runBlockOnMain {
+            TSIdentityVerification.startFaceAuth(deviceSessionId: deviceSessionId)
+            resolve(true)
+        }
+    }
+    
     // MARK: - Threading
     
     private func runBlockOnMain(_ block: @escaping () -> Void) {

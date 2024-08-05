@@ -3,15 +3,18 @@ import { Button, StyleSheet, Text, View } from 'react-native';
 
 export type Props = {
     onStartIDV: () => void;
+    onStartFaceAuth: () => void;
+    isInSession: boolean;
     errorMessage: string;
 };
 
-const HomeScreen: React.FC<Props> = ({ onStartIDV, errorMessage }) => {
+const HomeScreen: React.FC<Props> = ({ onStartIDV, onStartFaceAuth, isInSession, errorMessage }) => {
 
     return (
         <View style={styles.container}>
             <Text style={styles.sectionTitle}>{"Identinty Verification"}</Text>
             { renderStartIDVButton() }
+            { renderStartFaceAuthVButton() }
             { renderStatusLabel() }
         </View>
     );
@@ -25,11 +28,25 @@ const HomeScreen: React.FC<Props> = ({ onStartIDV, errorMessage }) => {
     }
 
     function renderStartIDVButton(): ReactElement {
+        if (isInSession) { return <></> }
         return (
             <View style={{marginTop: 24}}>
                 <Button 
                     title="Start Identity Verification" 
                     onPress={onStartIDV}
+                />
+            </View>
+        )
+    }
+
+    function renderStartFaceAuthVButton(): ReactElement {
+        if (!isInSession) { return <></> }
+        
+        return (
+            <View style={{marginTop: 24}}>
+                <Button 
+                    title="Start Face Authentication" 
+                    onPress={onStartFaceAuth}
                 />
             </View>
         )
