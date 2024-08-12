@@ -8,6 +8,7 @@ import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactContext
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.modules.core.DeviceEventManagerModule
+import com.transmit.identityverification.ITSFaceAuthenticationStatus
 import com.transmit.identityverification.ITSIdentityVerificationStatus
 import com.transmit.identityverification.TSIdentityVerification
 import com.transmit.identityverification.TSIdentityVerification.registerForStatus
@@ -16,7 +17,8 @@ import com.transmit.identityverification.TSIdentityVerificationError
 import com.transmit.identityverification.TSRecaptureReason
 import timber.log.Timber
 
-class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext), ITSIdentityVerificationStatus {
+class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext),
+ ITSIdentityVerificationStatus, ITSFaceAuthenticationStatus {
 
   private val idvStatusChangeEventName: String = "idv_status_change_event"
 
@@ -34,7 +36,8 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
   fun initialize(clientId: String, baseURL: String) {
     Timber.d(">>> Identity Verification SDK initialize")
     TSIdentityVerification.initialize(reactContext, clientId)
-    registerForStatus(this)
+    TSIdentityVerification.registerForStatus(this)
+    TSIdentityVerification.registerForFaceAuthStatus(this)
   }
 
   @ReactMethod
@@ -69,7 +72,7 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
       return
     }
     val activity = currentActivity!!
-//    TSIdentityVerification. // continue from here
+    TSIdentityVerification.startFaceAuth(activity, deviceSessionId)
     promise.resolve(true)
   }
 
@@ -131,5 +134,29 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
     reportIDVStatusChange(IDVStatusType.VerificationDidStartProcessing, null)
   }
 
-  //endregion
+  // endregion
+
+  // Face Authentication Status
+
+  override fun faceAuthenticationStartCapturing() {
+        Timber.d("Not yet implemented")
+    }
+
+    override fun faceAuthenticationStartProcessing() {
+        Timber.d("Not yet implemented")
+    }
+
+    override fun faceAuthenticationCompleted() {
+        Timber.d("Not yet implemented")
+    }
+
+    override fun faceAuthenticationCanceled() {
+        Timber.d("Not yet implemented")
+    }
+
+    override fun faceAuthenticationFail(p0: TSIdentityVerificationError) {
+        Timber.d("Not yet implemented")
+    }
+
+  // endregion
 }

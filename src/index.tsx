@@ -56,10 +56,9 @@ class IdentityVerification implements TSIdentityVerificationModule {
     return TsIdv.recapture();
   }
 
-  /*
   public startFaceAuth = async (deviceSessionId: string): Promise<void> => {
     return TsIdv.startFaceAuth(deviceSessionId);
   }
-  */
+  
 }
 export default new IdentityVerification();
