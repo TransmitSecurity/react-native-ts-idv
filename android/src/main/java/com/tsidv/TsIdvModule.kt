@@ -14,6 +14,7 @@ import com.transmit.identityverification.TSIdentityVerification.registerForStatu
 import com.transmit.identityverification.TSIdentityVerification.start
 import com.transmit.identityverification.TSIdentityVerificationError
 import com.transmit.identityverification.TSRecaptureReason
+import com.ts.coresdk.TSLog
 import timber.log.Timber
 
 class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext), ITSIdentityVerificationStatus {
@@ -38,6 +39,12 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
   }
 
   @ReactMethod
+  fun setLoggingEnabled(loggingEnabled: Boolean) {
+    Timber.d(">>> loggingEnabled = $loggingEnabled")
+    TSLog.setLoggingEnabled(loggingEnabled)
+  }
+
+ @ReactMethod
   fun startIdentityVerification(startToken: String, promise: Promise) {
     Timber.d(">>> startIdentityVerification")
     if (currentActivity == null) {

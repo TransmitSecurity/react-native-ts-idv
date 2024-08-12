@@ -48,6 +48,10 @@ class IdentityVerification implements TSIdentityVerificationModule {
     return TsIdv.initialize(clientId, baseUrl);
   }
 
+  public setLoggingEnabled = async (loggingEnabled: boolean): Promise<void> => {
+    return TsIdv.setLoggingEnabled(loggingEnabled);
+  }
+
   public startIdentityVerification = async (startToken: string): Promise<void> => {
     return TsIdv.startIdentityVerification(startToken);
   }

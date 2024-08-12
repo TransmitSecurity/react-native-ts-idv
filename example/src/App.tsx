@@ -193,6 +193,7 @@ export default class App extends React.Component<any, State> {
       this.logAppEvent("Error: This code requires configuration of the App's Client ID and Secret. Please set the values in config.ts before proceeding.");
       return;
     }
+    IdentityVerification.setLoggingEnabled(true);
     IdentityVerification.initialize(config.clientId);
     this.registerForEvents();
     this.requestCameraPermissions();
