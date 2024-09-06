@@ -18,5 +18,5 @@ const TsIdv = NativeModules.TsIdv
     );
 
 export function multiply(a: number, b: number): Promise<number> {
-  return TsIdv.multiply(a, b);
+  return Promise.resolve(10);
 }

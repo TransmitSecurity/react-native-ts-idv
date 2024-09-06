@@ -39,5 +39,9 @@ allprojects {
         }
         mavenCentral()
         google()
+
+        maven {
+            url('https://transmit.jfrog.io/artifactory/transmit-security-gradle-release-local/')
+        }
     }
 }

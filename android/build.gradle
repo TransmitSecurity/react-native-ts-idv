@@ -85,6 +85,10 @@ android {
 repositories {
   mavenCentral()
   google()
+
+  maven {
+      url('https://transmit.jfrog.io/artifactory/transmit-security-gradle-release-local/')
+    }
 }
 
 def kotlin_version = getExtOrDefault("kotlinVersion")
@@ -95,5 +99,6 @@ dependencies {
   //noinspection GradleDynamicVersion
   implementation "com.facebook.react:react-native:+"
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+  implementation("com.ts.sdk:identityverification:1.1.1")
 }
 
