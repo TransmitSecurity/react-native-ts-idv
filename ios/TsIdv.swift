@@ -1,5 +1,6 @@
 import React
 import IdentityVerification
+import TSCoreSDK
 
 @objc(TsIdv)
 class TsIdv: RCTEventEmitter {
@@ -60,6 +61,17 @@ class TsIdv: RCTEventEmitter {
         }
     }
     
+    @objc(setLogLevel:withResolver:withRejecter:)
+    func setLogLevel(_ jsLogLevel: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+        runBlockOnMain { [unowned self] in
+            guard let logLevel = self.parseLogLevel(jsLogLevel) else {
+                reject(self.kTag, "Invalid log level provider", nil)
+                return
+            }
+            resolve(true)
+        }
+    }
+    
     @objc(startIdentityVerification:withResolver:withRejecter:)
     func startIdentityVerification(_ startToken: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
         runBlockOnMain {
@@ -116,6 +128,21 @@ class TsIdv: RCTEventEmitter {
     
     override func stopObserving() {
         isListening = false
+    }
+    
+    // MARK: - Helpers
+    
+    private func parseLogLevel(_ jsLogLevel: String) -> TSLogLevel? {
+        switch jsLogLevel {
+        case "verbose": return .verbose
+        case "debug": return .debug
+        case "info": return .info
+        case "warning": return .warning
+        case "error": return .error
+        case "crytical": return .crytical
+        case "off": return .off
+        default: return nil
+        }
     }
 }
 
