@@ -15,6 +15,12 @@ class TsIdv: RCTEventEmitter {
         case verificationDidStartCapturing
         case verificationDidStartProcessing
         case verificationRequiresRecapture
+        
+        case faceAuthenticationDidCancel
+        case faceAuthenticationDidComplete
+        case faceAuthenticationDidStartCapturing
+        case faceAuthenticationDidStartProcessing
+        case faceAuthenticationDidFail
     }
     
     private enum RejectionReason: String {
@@ -49,6 +55,7 @@ class TsIdv: RCTEventEmitter {
         runBlockOnMain {            
            TSIdentityVerification.initialize(baseUrl: baseUrl, clientId: clientId)
             TSIdentityVerification.delegate = self
+            TSIdentityVerification.faceAuthDelegate = self
             resolve(true)
         }
     }
@@ -135,5 +142,28 @@ extension TsIdv: TSIdentityVerificationDelegate {
     
     func verificationRequiresRecapture(reason: TSRecaptureReason) {
         reportIDVStatusChange(.verificationRequiresRecapture, additionalData: ["error": reason.description])
+    }
+}
+
+extension TsIdv: TSIdentityFaceAuthenticationDelegate {
+    
+    func faceAuthenticationDidCancel() {
+        reportIDVStatusChange(.faceAuthenticationDidCancel)
+    }
+    
+    func faceAuthenticationDidComplete() {
+        reportIDVStatusChange(.faceAuthenticationDidComplete)
+    }
+    
+    func faceAuthenticationDidStartCapturing() {
+        reportIDVStatusChange(.faceAuthenticationDidStartCapturing)
+    }
+    
+    func faceAuthenticationDidStartProcessing() {
+        reportIDVStatusChange(.faceAuthenticationDidStartProcessing)
+    }
+    
+    func faceAuthenticationDidFail(with error: TSIdentityVerificationError) {
+        reportIDVStatusChange(.faceAuthenticationDidFail, additionalData: ["error": error.localizedDescription])
     }
 }

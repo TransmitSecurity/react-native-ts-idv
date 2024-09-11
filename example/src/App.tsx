@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import { 
-  NativeModules, NativeEventEmitter, SafeAreaView, 
-  type EmitterSubscription, ActivityIndicator, View, 
+import {
+  NativeModules, NativeEventEmitter, SafeAreaView,
+  type EmitterSubscription, ActivityIndicator, View,
   StyleSheet, Platform, Alert, PermissionsAndroid
 } from 'react-native';
-import MockServer, { 
-  type AccessTokenResponse, type FaceAuthSessionResponse, type VerificationResultsResponse, 
-  type VerificationSessionResponse 
+import MockServer, {
+  type AccessTokenResponse, type FaceAuthSessionResponse, type VerificationResultsResponse,
+  type VerificationSessionResponse
 } from './services/mock_server';
 
 import HomeScreen from './home';
@@ -43,6 +43,12 @@ const enum VerificationStatus {
   verificationDidStartCapturing = "verificationDidStartCapturing",
   verificationDidStartProcessing = "verificationDidStartProcessing",
   verificationRequiresRecapture = "verificationRequiresRecapture",
+
+  faceAuthenticationDidCancel = "faceAuthenticationDidCancel",
+  faceAuthenticationDidComplete = "faceAuthenticationDidComplete",
+  faceAuthenticationDidFail = "faceAuthenticationDidFail",
+  faceAuthenticationDidStartCapturing = "faceAuthenticationDidStartCapturing",
+  faceAuthenticationDidStartProcessing = "faceAuthenticationDidStartProcessing"
 }
 
 export default class App extends React.Component<any, State> {
@@ -241,6 +247,8 @@ export default class App extends React.Component<any, State> {
     const additionalData = params["additionalData"];
 
     switch (status) {
+      // Identity Verification Events:
+      //--------------------------------
       case VerificationStatus.verificationDidCancel:
         this.setState({ errorMessage: `User Canceled`, isProcessing: false });
         this.logAppEvent(`verificationDidCancel`);
@@ -248,12 +256,7 @@ export default class App extends React.Component<any, State> {
       case VerificationStatus.verificationDidComplete:
         this.logAppEvent(`verificationDidComplete`);
         this.setState({ errorMessage: ``, isProcessing: false });
-
-        if (this.verificationSession) {
-          await this.handleIdentityVerificationComplete();
-        } else if (this.faceAuthSession) {
-          await this.handleFaceAuthComplete();
-        }
+        await this.handleIdentityVerificationComplete();
         break;
       case VerificationStatus.verificationDidFail:
         const error: TSIDV.IdentityVerificationError = additionalData["error"];
@@ -272,6 +275,31 @@ export default class App extends React.Component<any, State> {
         const reason: string = additionalData["error"];
         this.setState({ errorMessage: `Require Recapture: ${reason}`, isProcessing: false, isRecaptureModalVisible: true });
         this.logAppEvent(`verificationRequiresRecapture: ${additionalData}`);
+        break;
+
+      // Face Authentication Events:
+      // ------------------------------
+      
+      case VerificationStatus.faceAuthenticationDidCancel:
+        this.setState({ errorMessage: `User Canceled`, isProcessing: false });
+        this.logAppEvent(`faceAuthenticationDidCancel`);
+        break;
+      case VerificationStatus.faceAuthenticationDidComplete:
+        this.logAppEvent(`faceAuthenticationDidComplete`);
+        this.setState({ errorMessage: ``, isProcessing: false });
+        await this.handleFaceAuthComplete();
+        break;
+      case VerificationStatus.faceAuthenticationDidFail:
+        this.setState({ errorMessage: `Face Authentication Failed: ${additionalData["error"]}`, isProcessing: false });
+        this.logAppEvent(`faceAuthenticationDidFail`);
+        break;
+      case VerificationStatus.faceAuthenticationDidStartCapturing:
+        this.logAppEvent(`faceAuthenticationDidStartCapturing`);
+        this.setState({ errorMessage: `` });
+        break;
+      case VerificationStatus.faceAuthenticationDidStartProcessing:
+        this.logAppEvent(`faceAuthenticationDidStartProcessing`);
+        this.setState({ errorMessage: ``, isProcessing: true });
         break;
       default:
         this.setState({ errorMessage: `Invalid status response`, isProcessing: false });
