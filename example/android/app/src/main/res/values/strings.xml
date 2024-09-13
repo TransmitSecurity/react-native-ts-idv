@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="transmit_security_client_id">"CLIENT_ID"</string>
-    <string name="transmit_security_base_url">https://api.transmitsecurity.io/</string>
-</resources>

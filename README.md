@@ -1,6 +1,6 @@
-# React Native - Identity Verification
+# React Native - Transmit Security Identity Verification SDK
 
-React Native module for Transmit Security Identity Verification SDK. Verify customers’ identities during onboarding and beyond.
+You can use identity verification to securely verify the identity of your customers using documents like their driver’s license or passport—such as before allowing them to open a new bank account online or pick up a rental car. 
 
 ## About Identity Verification
 Transmit Security Identity Verification SDK offers a comprehensive identity verification solution, utilizing deep document inspection, biometric matching, and rapid background checks to streamline customer enrollment, enhance compliance, expedite time to market, prevent fraud, and fortify security within a seamless CIAM platform. 
@@ -22,8 +22,9 @@ To integrate this module, you'll need to configure an application.
 
 ## Example project setup
 1. In your project, navigate to `example/src/config.ts` and configure the clientId and secret using the credentials obtained from the Transmit portal.
-2. Ensure you have all the necessary dependencies by running `yarn` in both the module's root folder and the example root folder.
-3. Run the example app on a real device using Xcode or Android Studio. Alternatively, execute `yarn example ios` or `yarn example android`.
+2. Configure your Client ID in the SDK configuration `.plist` file for iOS, and/or `strings.xml` for Android.
+3. Ensure you have all the necessary dependencies by running `yarn` in both the module's root folder and the example root folder.
+4. Run the example app on a real device using Xcode or Android Studio. Alternatively, execute `yarn example ios` or `yarn example android`.
 
 > **Important Security Note: Never store your `secret` in a front-end application.**
 > 
@@ -33,6 +34,7 @@ To integrate this module, you'll need to configure an application.
 To install this module, execute the following command in your project's root folder.
 ```sh
 npm install react-native-ts-idv
+# Or `yarn add react-native-ts-idv`
 ```
 
 #### iOS Setup
@@ -52,8 +54,42 @@ Note:
 As for projects on Gradle 8+ and Kotlin 1.8+ build will fail if the JDK version between 
 compileKotlin and compileJava and jvmTarget are not aligned. 
 
-This won't be necessary anymore from React Native 0.73. More on this:
-https://kotlinlang.org/docs/whatsnew18.html#obligatory-check-for-jvm-targets-of-related-kotlin-and-java-compile-tasks
+## Platform Configuration File
+Configure your Client ID and Base URL
+
+#### iOS
+1. Open your project's `.xcworkspace` found under `YOUR_PROJECT_PATH/iOS` in Xcode.
+2. Create a plist file named TransmitSecurity.plist in your Application with the following content. CLIENT_ID is configured in your Transmit server. Make sure the file is linked to your target.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>credentials</key>
+    <dict>
+        <!-- Use api.eu.transmitsecurity.io for EU, api.ca.transmitsecurity.io for CA -->
+        <key>baseUrl</key>
+        <string>https://api.transmitsecurity.io</string>
+        <key>clientId</key>
+        <string>CLIENT_ID</string>
+    </dict>
+</dict>
+</plist>
+```
+#### Android `strings.xml`
+1. Add to the `strings.xml` file in your Application the following content. The CLIENT_ID should be replaced with your client ID. This file is typically found in `android/src/main/res/values/strings.xml`
+
+```xml
+<resources>
+    <!-- Transmit Security Credentials -->
+    <string name="transmit_security_app_id">"default_application"</string>
+    <string name="transmit_security_client_id">"CLIENT_ID"</string>
+    <string name="transmit_security_base_url">https://api.transmitsecurity.io</string>
+</resources>
+```
+##### 
+
 
 ## Add camera permission
 For module usage, configuring permissions for the device camera on both iOS and Android is necessary. You must also explicitly request user permission before commencing the identity verification process. See the `/example` project to learn more.
@@ -92,7 +128,7 @@ componentWillUnmount(): void {
 }
 ```
 
-#### Start the verification process
+## Start Verification Process
 ```js
 onStartVerificationProcess = async (): Promise<void> => {
     try {
@@ -106,7 +142,7 @@ onStartVerificationProcess = async (): Promise<void> => {
 }
 ```
 
-#### Handle status changes
+### Handle Verification Status Changes
 ```js
 const enum VerificationStatus {
   verificationDidCancel = "verificationDidCancel",
@@ -148,8 +184,64 @@ private onVerificationStatusChange = (params: any) => {
 }
 ```
 
-#### Obtaining verification results
+## Obtaining verification results
 Once the module emits the `verificationDidComplete` event, you can fetch the results from your server as described in [Step 10: Handle verification result](https://developer.transmitsecurity.com/guides/verify/quick_start_ios/#step-10-handle-verification-result) 
+
+
+## Start Face Authentication
+Please make sure to review the [Face Authentication](https://developer.transmitsecurity.com/guides/verify/quick_start_face_auth_ios/) documentation before implementing this feature.
+
+```js
+onStartFaceAuth = async (): Promise<void> => {
+    const accessToken = 'ACCESS_TOKEN';
+    const lastVerificationSessionID = 'SESSION_ID';
+    const faceAuthSession = await YOUR_SERVER.createFaceAuthSession(accessToken, lastVerificationSessionID);
+    
+    try {
+      await IdentityVerification.startFaceAuth(faceAuthSession.deviceSessionId);
+    } catch (error) {
+      console.error(`Face Authentication Error: ${error}`);
+    }
+  }
+```
+
+### Handle Face Authentication Status Changes
+```js
+const enum VerificationStatus {
+    // IDV cases omitted
+  faceAuthenticationDidCancel = "faceAuthenticationDidCancel",
+  faceAuthenticationDidComplete = "faceAuthenticationDidComplete",
+  faceAuthenticationDidFail = "faceAuthenticationDidFail",
+  faceAuthenticationDidStartCapturing = "faceAuthenticationDidStartCapturing",
+  faceAuthenticationDidStartProcessing = "faceAuthenticationDidStartProcessing"
+}
+
+private onVerificationStatusChange = (params: any) => {
+    const status = params["status"];
+    const additionalData = params["additionalData"];
+
+    switch (status) {
+        case VerificationStatus.faceAuthenticationDidCancel:
+            console.log(`faceAuthenticationDidCancel`);
+            break;
+        case VerificationStatus.faceAuthenticationDidComplete:
+            console.log(`faceAuthenticationDidComplete`);
+            // handle face authentication completion
+            break;
+        case VerificationStatus.faceAuthenticationDidFail:
+            console.log(`faceAuthenticationDidFail`);
+            break;
+        case VerificationStatus.faceAuthenticationDidStartCapturing:
+            console.log(`faceAuthenticationDidStartCapturing`);
+            break;
+        case VerificationStatus.faceAuthenticationDidStartProcessing:
+            console.log(`faceAuthenticationDidStartProcessing`);
+            break;
+        default:
+            console.log(`Unhandled face authentication status: ${status}`);
+    }
+}
+```
 
 ## Important Notes
 1. Make sure to use `idv_status_change_event` for the emitter event name.

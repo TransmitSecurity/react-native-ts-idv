@@ -130,6 +130,7 @@ export default class App extends React.Component<any, State> {
   onStartVerificationProcess = async (): Promise<void> => {
     try {
       const accessToken = this.accessTokenResponse?.token || "";
+  
       this.verificationSession = await this.mockServer.createVerificationSession(accessToken);
       await IdentityVerification.startIdentityVerification(this.verificationSession.startToken);
 
@@ -194,7 +195,13 @@ export default class App extends React.Component<any, State> {
       this.logAppEvent("Error: This code requires configuration of the App's Client ID and Secret. Please set the values in config.ts before proceeding.");
       return;
     }
-    IdentityVerification.initialize(config.clientId);
+    
+    if (Platform.OS === "android") {
+      await IdentityVerification.initializeSDK();
+    } else {
+      await IdentityVerification.initialize(config.clientId);
+    }
+    
     this.registerForEvents();
     this.requestCameraPermissions();
 
