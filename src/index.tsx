@@ -48,6 +48,7 @@ export interface TSIdentityVerificationModule {
   initializeSDK: () => Promise<void>;
   initialize: (clientId: string, baseUrl: TSIDV.BaseURL) => Promise<void>;
   startIdentityVerification: (startToken: string) => Promise<void>;
+  setLogLevel: (logLevel: TSIDV.IDVLogLevel) => Promise<void>;
   recapture: () => Promise<void>;
   startFaceAuth: (deviceSessionId: string) => Promise<void>;
 }
@@ -60,6 +61,10 @@ class IdentityVerification implements TSIdentityVerificationModule {
 
   public initialize = async (clientId: string, baseUrl: TSIDV.BaseURL = TSIDV.BaseURL.us): Promise<void> => {
     return TsIdv.initialize(clientId, baseUrl);
+  }
+
+  public setLogLevel = async (logLevel: TSIDV.IDVLogLevel): Promise<void> => {
+    return TsIdv.setLogLevel(logLevel);
   }
 
   public startIdentityVerification = async (startToken: string): Promise<void> => {

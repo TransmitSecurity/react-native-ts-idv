@@ -16,6 +16,7 @@ import com.transmit.identityverification.TSIdentityVerification.registerForStatu
 import com.transmit.identityverification.TSIdentityVerification.start
 import com.transmit.identityverification.TSIdentityVerificationError
 import com.transmit.identityverification.TSRecaptureReason
+import com.ts.coresdk.TSLog
 
 class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext),
   ITSIdentityVerificationStatus, ITSFaceAuthenticationStatus {
@@ -69,19 +70,9 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
   @ReactMethod
   fun setLogLevel(jsLogLevel: String, promise: Promise) {
     Log.d(TAG,"Identity Verification setLogLevel")
-
+    val isOff = jsLogLevel === "off"
+    TSLog.setLoggingEnabled(isOff)
   }
-
-//  @objc(setLogLevel:withResolver:withRejecter:)
-//  func setLogLevel(_ jsLogLevel: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-//    runBlockOnMain { [unowned self] in
-//      guard let logLevel = self.parseLogLevel(jsLogLevel) else {
-//      reject(self.kTag, "Invalid log level provider", nil)
-//      return
-//    }
-//      resolve(true)
-//    }
-//  }
 
   @ReactMethod
   fun startIdentityVerification(startToken: String, promise: Promise) {

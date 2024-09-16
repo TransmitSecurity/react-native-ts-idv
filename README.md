@@ -243,6 +243,10 @@ private onVerificationStatusChange = (params: any) => {
 }
 ```
 
+## Setting Log Level
+This module provides the `setLogLevel: (logLevel: TSIDV.IDVLogLevel) => Promise<void>` API, allowing you to configure the SDK log level.
+Android: Setting the log level to off disables all logging. Any other valid `IDVLogLevel` will enable logging.
+
 ## Important Notes
 1. Make sure to use `idv_status_change_event` for the emitter event name.
 2. Please take note that the example application uses a client-side mock server. In a production environment, a real server is required. Additionally, it is crucial to emphasize that storing the client secret in your front-end application is strictly discouraged for security reasons.
