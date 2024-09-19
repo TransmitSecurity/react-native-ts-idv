@@ -1,6 +1,6 @@
 {
   "name": "react-native-ts-idv",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "React Native module for Transmit Security Identity Verification SDK",
   "source": "./src/index.tsx",
   "main": "./lib/commonjs/index.js",
