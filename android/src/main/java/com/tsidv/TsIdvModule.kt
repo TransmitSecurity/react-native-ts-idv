@@ -71,7 +71,7 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
   fun setLogLevel(jsLogLevel: String, promise: Promise) {
     Log.d(TAG,"Identity Verification setLogLevel")
     val isOff = jsLogLevel === "off"
-    TSLog.setLoggingEnabled(isOff)
+    TSLog.setLoggingEnabled(!isOff)
   }
 
   @ReactMethod

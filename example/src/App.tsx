@@ -195,6 +195,8 @@ export default class App extends React.Component<any, State> {
       this.logAppEvent("Error: This code requires configuration of the App's Client ID and Secret. Please set the values in config.ts before proceeding.");
       return;
     }
+
+    IdentityVerification.setLogLevel(TSIDV.IDVLogLevel.verbose);
     
     if (Platform.OS === "android") {
       await IdentityVerification.initializeSDK();

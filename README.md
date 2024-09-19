@@ -110,11 +110,8 @@ componentDidMount(): void {
 }
 
 private onAppReady = async (): Promise<void> => {
-    /* Initialize the module with parameters: 
-        1. ClientID obtained from the application settings in the Transmit portal
-        2. Optional: Base URL. Defaults to TSIDV.BaseURL.us
-    */
-    IdentityVerification.initialize(config.clientId, TSIDV.BaseURL.us);
+    
+    await IdentityVerification.initializeSDK();
     
     // Register to receive status updates
     this.verificationStatusChangeSub = eventEmitter.addListener(
