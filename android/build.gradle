@@ -99,6 +99,6 @@ dependencies {
   //noinspection GradleDynamicVersion
   implementation "com.facebook.react:react-native:+"
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-  implementation("com.ts.sdk:identityverification:1.1.1")
+  implementation("com.ts.sdk:identityverification:1.2.0")
 }
 

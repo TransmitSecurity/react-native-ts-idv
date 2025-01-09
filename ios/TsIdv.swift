@@ -68,6 +68,7 @@ class TsIdv: RCTEventEmitter {
                 reject(self.kTag, "Invalid log level provider", nil)
                 return
             }
+            TSIdentityVerification.setLogLevel(logLevel)
             resolve(true)
         }
     }
