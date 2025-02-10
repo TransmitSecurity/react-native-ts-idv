@@ -48,7 +48,11 @@ const enum VerificationStatus {
   faceAuthenticationDidComplete = "faceAuthenticationDidComplete",
   faceAuthenticationDidFail = "faceAuthenticationDidFail",
   faceAuthenticationDidStartCapturing = "faceAuthenticationDidStartCapturing",
-  faceAuthenticationDidStartProcessing = "faceAuthenticationDidStartProcessing"
+  faceAuthenticationDidStartProcessing = "faceAuthenticationDidStartProcessing",
+
+  mosaicUIVerificationDidComplete = "mosaicUIVerificationDidComplete",
+  mosaicUIVerificationDidCancel = "mosaicUIVerificationDidCancel",
+  mosaicUIVerificationDidFail = "mosaicUIVerificationDidFail",
 }
 
 export default class App extends React.Component<any, State> {
