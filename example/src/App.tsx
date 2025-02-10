@@ -86,6 +86,7 @@ export default class App extends React.Component<any, State> {
         <HomeScreen
           onStartIDV={this.onStartVerificationProcess}
           onStartFaceAuth={this.onStartFaceAuth}
+          onStartMosaicUI={this.onStartMosaicUI}
           isInSession={this.state.lastVerificationSessionID !== null}
           errorMessage={this.state.errorMessage}
         />
@@ -164,6 +165,20 @@ export default class App extends React.Component<any, State> {
     } catch (error) {
       this.logAppEvent(`Error verifying user identity: ${error}`);
       this.setState({ errorMessage: `${error}`, isProcessing: false });
+    }
+  }
+
+  onStartMosaicUI = async (): Promise<void> => {
+    try {
+      const accessToken = this.accessTokenResponse?.token || "";
+  
+      this.verificationSession = await this.mockServer.createVerificationSession(accessToken);
+      await IdentityVerification.startMosaicUI(this.verificationSession.startToken);
+
+      this.logAppEvent("Started identity verification with MosaicUI process");
+    } catch (error) {
+      this.logAppEvent(`Error verifying user identity: ${error}`);
+      this.setState({ errorMessage: `${error}` });
     }
   }
 

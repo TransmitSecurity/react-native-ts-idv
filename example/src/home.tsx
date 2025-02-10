@@ -1,18 +1,20 @@
-import React, { ReactElement } from 'react';
+import React, { type ReactElement } from 'react';
 import { Button, StyleSheet, Text, View } from 'react-native';
 
 export type Props = {
     onStartIDV: () => void;
     onStartFaceAuth: () => void;
+    onStartMosaicUI: () => void;
     isInSession: boolean;
     errorMessage: string;
 };
 
-const HomeScreen: React.FC<Props> = ({ onStartIDV, onStartFaceAuth, isInSession, errorMessage }) => {
+const HomeScreen: React.FC<Props> = ({ onStartIDV, onStartFaceAuth, onStartMosaicUI, isInSession, errorMessage }) => {
 
     return (
         <View style={styles.container}>
             <Text style={styles.sectionTitle}>{"Identinty Verification"}</Text>
+            { renderStartIDVWithMosaicUIButton() }
             { renderStartIDVButton() }
             { renderStartFaceAuthVButton() }
             { renderStatusLabel() }
@@ -34,6 +36,18 @@ const HomeScreen: React.FC<Props> = ({ onStartIDV, onStartFaceAuth, isInSession,
                 <Button 
                     title="Start Identity Verification" 
                     onPress={onStartIDV}
+                />
+            </View>
+        )
+    }
+
+    function renderStartIDVWithMosaicUIButton(): ReactElement {
+        if (isInSession) { return <></> }
+        return (
+            <View style={{marginTop: 24}}>
+                <Button 
+                    title="Start MosaicUI Identity Verification" 
+                    onPress={onStartMosaicUI}
                 />
             </View>
         )

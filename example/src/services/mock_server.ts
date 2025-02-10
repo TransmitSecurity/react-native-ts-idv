@@ -70,7 +70,6 @@ class MockServer {
     // MARK: -Document Verification methods
 
     createVerificationSession = async (accessToken: string): Promise<VerificationSessionResponse> => {
-
         try {
             const resp = await fetch(
                 `${config.baseAPIURL}/verify/api/v1/verification`,
