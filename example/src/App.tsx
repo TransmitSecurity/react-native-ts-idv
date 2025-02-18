@@ -48,7 +48,11 @@ const enum VerificationStatus {
   faceAuthenticationDidComplete = "faceAuthenticationDidComplete",
   faceAuthenticationDidFail = "faceAuthenticationDidFail",
   faceAuthenticationDidStartCapturing = "faceAuthenticationDidStartCapturing",
-  faceAuthenticationDidStartProcessing = "faceAuthenticationDidStartProcessing"
+  faceAuthenticationDidStartProcessing = "faceAuthenticationDidStartProcessing",
+
+  mosaicUIVerificationDidComplete = "mosaicUIVerificationDidComplete",
+  mosaicUIVerificationDidCancel = "mosaicUIVerificationDidCancel",
+  mosaicUIVerificationDidFail = "mosaicUIVerificationDidFail",
 }
 
 export default class App extends React.Component<any, State> {
@@ -82,6 +86,7 @@ export default class App extends React.Component<any, State> {
         <HomeScreen
           onStartIDV={this.onStartVerificationProcess}
           onStartFaceAuth={this.onStartFaceAuth}
+          onStartMosaicUI={this.onStartMosaicUI}
           isInSession={this.state.lastVerificationSessionID !== null}
           errorMessage={this.state.errorMessage}
         />
@@ -163,6 +168,20 @@ export default class App extends React.Component<any, State> {
     }
   }
 
+  onStartMosaicUI = async (): Promise<void> => {
+    try {
+      const accessToken = this.accessTokenResponse?.token || "";
+  
+      this.verificationSession = await this.mockServer.createVerificationSession(accessToken);
+      await IdentityVerification.startMosaicUI(this.verificationSession.startToken);
+
+      this.logAppEvent("Started identity verification with MosaicUI process");
+    } catch (error) {
+      this.logAppEvent(`Error verifying user identity: ${error}`);
+      this.setState({ errorMessage: `${error}` });
+    }
+  }
+
   private identityVerificationCompleted = async (sessionId: string, accessToken: string): Promise<void> => {
 
     try {
@@ -197,13 +216,8 @@ export default class App extends React.Component<any, State> {
     }
 
     IdentityVerification.setLogLevel(TSIDV.IDVLogLevel.verbose);
-    
-    if (Platform.OS === "android") {
-      await IdentityVerification.initializeSDK();
-    } else {
-      await IdentityVerification.initialize(config.clientId);
-    }
-    
+    await IdentityVerification.initialize(config.clientId);
+
     this.registerForEvents();
     this.requestCameraPermissions();
 

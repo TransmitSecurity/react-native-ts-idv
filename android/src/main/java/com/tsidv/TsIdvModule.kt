@@ -10,6 +10,7 @@ import com.facebook.react.bridge.ReactContext
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.modules.core.DeviceEventManagerModule
 import com.transmit.identityverification.ITSFaceAuthenticationStatus
+import com.transmit.identityverification.ITSIdentityVerificationMosaicUIStatus
 import com.transmit.identityverification.ITSIdentityVerificationStatus
 import com.transmit.identityverification.TSIdentityVerification
 import com.transmit.identityverification.TSIdentityVerification.registerForStatus
@@ -19,7 +20,7 @@ import com.transmit.identityverification.TSRecaptureReason
 import com.ts.coresdk.TSLog
 
 class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext),
-  ITSIdentityVerificationStatus, ITSFaceAuthenticationStatus {
+  ITSIdentityVerificationStatus, ITSFaceAuthenticationStatus, ITSIdentityVerificationMosaicUIStatus {
 
   private val idvStatusChangeEventName: String = "idv_status_change_event"
   private val TAG = "IDV"
@@ -47,6 +48,12 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
     FaceAuthenticationCompleted("faceAuthenticationDidComplete"),
     FaceAuthenticationCanceled("faceAuthenticationDidCancel"),
     FaceAuthenticationFail("faceAuthenticationDidFail")
+  }
+
+  enum class MosaicUIAuthStatusType(val status: String) {
+    mosaicUIVerificationDidComplete("mosaicUIVerificationDidComplete"),
+    mosaicUIVerificationDidCancel("mosaicUIVerificationDidCancel"),
+    mosaicUIVerificationDidFail("mosaicUIVerificationDidFail")
   }
 
   // region IDV SDK API
@@ -82,7 +89,19 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
       return
     }
     val activity = currentActivity!!
-    start(activity, startToken)
+    TSIdentityVerification.start(activity, startToken)
+    promise.resolve(true)
+  }
+
+  @ReactMethod
+  fun startMosaicUI(startToken: String, promise: Promise) {
+    Log.d(TAG, "startMosaicUI")
+    if (currentActivity == null) {
+      promise.reject("Error during startMosaicUI", "currentActivity is NULL")
+      return
+    }
+    val activity = currentActivity!!
+    TSIdentityVerification.startWithSmartUI(activity, startToken);
     promise.resolve(true)
   }
 
@@ -197,24 +216,31 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
 
   // endregion
 
-  // region Helpers
+  // region Identity Verification Mosaic UI Status
 
-//  private fun parseLogLevel(jsLogLevel: String): TSLogLevel? {
-//    return when (jsLogLevel) {
-//      "verbose" -> TSLogLevel.VERBOSE
-//      "debug" -> TSLogLevel.DEBUG
-//      "info" -> TSLogLevel.INFO
-//      "warning" -> TSLogLevel.WARNING
-//      "error" -> TSLogLevel.ERROR
-//      "crytical" -> TSLogLevel.CRITICAL
-//      "off" -> TSLogLevel.OFF
-//      else -> null
-//    }
-//  }
+  override fun mosaicUIVerificationCompleted() {
+    reportIDVStatusChange(MosaicUIAuthStatusType.mosaicUIVerificationDidComplete.status, null)
+  }
+
+  override fun mosaicUIVerificationCanceled() {
+    reportIDVStatusChange(MosaicUIAuthStatusType.mosaicUIVerificationDidCancel.status, null)
+  }
+
+  override fun mosaicUIVerificationFailed(error: TSIdentityVerificationError) {
+    Log.d("MosaicUI verificationDidFail", error.name)
+    val errorMap: WritableMap = Arguments.createMap()
+    errorMap.putString("error", error.name)
+    reportIDVStatusChange(MosaicUIAuthStatusType.mosaicUIVerificationDidFail.status, errorMap)
+  }
+
+  // endregion
+
+  // region Helpers
 
   private fun registerSDKStatus() {
     registerForStatus(this)
     TSIdentityVerification.registerForFaceAuthStatus(this)
+    TSIdentityVerification.registerForStatusMosaicUI(this)
   }
 
 

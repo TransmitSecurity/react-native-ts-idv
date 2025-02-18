@@ -51,6 +51,7 @@ export interface TSIdentityVerificationModule {
   setLogLevel: (logLevel: TSIDV.IDVLogLevel) => Promise<void>;
   recapture: () => Promise<void>;
   startFaceAuth: (deviceSessionId: string) => Promise<void>;
+  startMosaicUI: (startToken: string) => Promise<void>;
 }
 
 class IdentityVerification implements TSIdentityVerificationModule {
@@ -77,6 +78,10 @@ class IdentityVerification implements TSIdentityVerificationModule {
 
   public startFaceAuth = async (deviceSessionId: string): Promise<void> => {
     return TsIdv.startFaceAuth(deviceSessionId);
+  }
+
+  public startMosaicUI = async (startToken: string): Promise<void> => {
+    return TsIdv.startMosaicUI(startToken);
   }
 }
 export default new IdentityVerification();
