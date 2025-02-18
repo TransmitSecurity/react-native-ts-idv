@@ -216,13 +216,8 @@ export default class App extends React.Component<any, State> {
     }
 
     IdentityVerification.setLogLevel(TSIDV.IDVLogLevel.verbose);
-    
-    if (Platform.OS === "android") {
-      await IdentityVerification.initializeSDK();
-    } else {
-      await IdentityVerification.initialize(config.clientId);
-    }
-    
+    await IdentityVerification.initialize(config.clientId);
+
     this.registerForEvents();
     this.requestCameraPermissions();
 
