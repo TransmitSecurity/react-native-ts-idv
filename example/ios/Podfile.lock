@@ -1,13 +1,13 @@
 PODS:
-  - AccountProtection (2.1.10):
+  - AccountProtection (2.1.12):
     - TSCoreSDK (~> 1.0.27)
   - boost (1.84.0)
   - DoubleConversion (1.1.6)
   - FBLazyVector (0.75.2)
   - fmt (9.1.0)
   - glog (0.3.5)
-  - IdentityVerification (1.2.2):
-    - AccountProtection (~> 2.1.9)
+  - IdentityVerification (1.2.3):
+    - AccountProtection (~> 2.1.12)
     - TSCoreSDK (~> 1.0.27)
   - RCT-Folly (2024.01.01.00):
     - boost
@@ -1214,10 +1214,10 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-ts-idv (1.0.5):
+  - react-native-ts-idv (1.0.6):
     - DoubleConversion
     - glog
-    - IdentityVerification (~> 1.2.2)
+    - IdentityVerification (~> 1.2.3)
     - RCT-Folly (= 2024.01.01.00)
     - RCTRequired
     - RCTTypeSafety
@@ -1715,13 +1715,13 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  AccountProtection: 9154d08c86586d632ef1821962953e22a4f313f3
+  AccountProtection: 871ae6927d64aa608c396b25000be08e6a53d767
   boost: 4cb898d0bf20404aab1850c656dcea009429d6c1
   DoubleConversion: 76ab83afb40bddeeee456813d9c04f67f78771b5
   FBLazyVector: 38bb611218305c3bc61803e287b8a81c6f63b619
   fmt: 4c2741a687cc09f0634a2e2c72a838b99f1ff120
   glog: 69ef571f3de08433d766d614c73a9838a06bf7eb
-  IdentityVerification: e48bf94fd0f858f7fb70a2ace1d07160140ec1d3
+  IdentityVerification: 058f5429c6e5d99e5c2d891c11b73cc7004b7989
   RCT-Folly: 4464f4d875961fce86008d45f4ecf6cef6de0740
   RCTDeprecation: 34cbf122b623037ea9facad2e92e53434c5c7422
   RCTRequired: 24c446d7bcd0f517d516b6265d8df04dc3eb1219
@@ -1751,7 +1751,7 @@ SPEC CHECKSUMS:
   React-logger: 8db32983d75dc2ad54f278f344ccb9b256e694fc
   React-Mapbuffer: 1c08607305558666fd16678b85ef135e455d5c96
   React-microtasksnativemodule: e8efd9e5df1ab51a58e45326b98787cf21d47e6e
-  react-native-ts-idv: cc1712cd435ec9a1b66b1f7801a34a2aad7f41aa
+  react-native-ts-idv: 7401c1c58591a8bcf1d8ea0240a3e49d74c731f8
   React-nativeconfig: 57781b79e11d5af7573e6f77cbf1143b71802a6d
   React-NativeModulesApple: e35ceb132b4005f4bb8924a3a87b9fd3c21b15ee
   React-perflogger: 8a360ccf603de6ddbe9ff8f54383146d26e6c936
