@@ -173,7 +173,7 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
   override fun verificationRequiresRecapture(reason: TSRecaptureReason?) {
     Log.d(TAG,"verification Status: Requires Recapture $reason")
     val errorMap: WritableMap = Arguments.createMap()
-    errorMap.putString("error", reason?.name)
+    errorMap.putString("error", reason?.toString())
     reportIDVStatusChange(IDVStatusType.VerificationRequiresRecapture.status, errorMap)
   }
 
