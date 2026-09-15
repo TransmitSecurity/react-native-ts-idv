@@ -77,8 +77,12 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
   @ReactMethod
   fun setLogLevel(jsLogLevel: String, promise: Promise) {
     Log.d(TAG,"Identity Verification setLogLevel")
-    val isOff = jsLogLevel === "off"
+    // The Android SDK exposes logging as a boolean, so every level other than
+    // "off" enables it. Uses == (structural equality); === is reference equality
+    // on a Kotlin String and matched only when both sides happened to be interned.
+    val isOff = jsLogLevel == "off"
     TSLog.setLoggingEnabled(!isOff)
+    promise.resolve(true)
   }
 
   @ReactMethod
