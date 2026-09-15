@@ -47,7 +47,7 @@ class TsIdv: RCTEventEmitter {
         
         do {
           try TSIdentityVerification.initializeSDK()
-          TSIdentityVerification.delegate = self
+          self.registerDelegates()
           resolve(true)
         } catch {
           reject(self.kTag, "Error during initializeSDK", error)
@@ -59,9 +59,7 @@ class TsIdv: RCTEventEmitter {
   func initialize(_ clientId: String, baseUrl: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
     runBlockOnMain {
       TSIdentityVerification.initialize(baseUrl: baseUrl, clientId: clientId)
-      TSIdentityVerification.delegate = self
-      TSIdentityVerification.faceAuthDelegate = self
-      TSIdentityVerification.mosaicUIDelegate = self
+      self.registerDelegates()
       resolve(true)
     }
   }
@@ -108,6 +106,17 @@ class TsIdv: RCTEventEmitter {
       TSIdentityVerification.startMosaicUI(startToken: startToken)
       resolve(true)
     }
+  }
+  
+  // MARK: - Delegate registration
+  
+  /// Registers every status delegate in one place, so the two initialization
+  /// entry points cannot drift. Previously `initializeSDK` set only `delegate`,
+  /// leaving face authentication and Mosaic UI status events undelivered.
+  private func registerDelegates() {
+    TSIdentityVerification.delegate = self
+    TSIdentityVerification.faceAuthDelegate = self
+    TSIdentityVerification.mosaicUIDelegate = self
   }
   
   // MARK: - Threading
