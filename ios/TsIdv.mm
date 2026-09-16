@@ -14,12 +14,6 @@ RCT_EXTERN_METHOD(startFaceAuth:(NSString *)deviceSessionId withResolver:(RCTPro
                   withRejecter:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(startMosaicUI:(NSString *)startToken withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
-RCT_EXTERN_METHOD(startDocumentAcquisition:(NSString *)startToken withAcquisitionId:(NSString *)acquisitionId
-                  withResolver:(RCTPromiseResolveBlock)resolve
-                  withRejecter:(RCTPromiseRejectBlock)reject)
-RCT_EXTERN_METHOD(startSelfieAcquisition:(NSString *)startToken withAcquisitionId:(NSString *)acquisitionId
-                  withResolver:(RCTPromiseResolveBlock)resolve
-                  withRejecter:(RCTPromiseRejectBlock)reject)
 
 + (BOOL)requiresMainQueueSetup
 {

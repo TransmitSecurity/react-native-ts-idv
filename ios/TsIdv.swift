@@ -26,11 +26,6 @@ class TsIdv: RCTEventEmitter {
     case mosaicUIVerificationDidComplete
     case mosaicUIVerificationDidCancel
     case mosaicUIVerificationDidFail
-
-    case modularVerificationDidStartCapturing
-    case modularVerificationDidComplete
-    case modularVerificationDidCancel
-    case modularVerificationDidFail
   }
   
   private enum RejectionReason: String {
@@ -113,54 +108,6 @@ class TsIdv: RCTEventEmitter {
     }
   }
   
-  /// Modular IDV: standalone document capture.
-  ///
-  /// The native call is throwing, so the error is surfaced through the promise
-  /// rather than being allowed to escape into the bridge. Empty strings from JS
-  /// are mapped back to nil, since the native signature takes optionals.
-  @objc(startDocumentAcquisition:withAcquisitionId:withResolver:withRejecter:)
-  func startDocumentAcquisition(
-    _ startToken: String,
-    acquisitionId: String,
-    resolve: @escaping RCTPromiseResolveBlock,
-    reject: @escaping RCTPromiseRejectBlock
-  ) -> Void {
-    runBlockOnMain { [weak self] in
-      guard let self = self else { return }
-      do {
-        try TSIdentityVerification.startDocumentAcquisition(
-          startToken: startToken.isEmpty ? nil : startToken,
-          acquisitionId: acquisitionId.isEmpty ? nil : acquisitionId
-        )
-        resolve(true)
-      } catch {
-        reject(self.kTag, "Error during startDocumentAcquisition", error)
-      }
-    }
-  }
-
-  /// Modular IDV: standalone selfie capture. See startDocumentAcquisition.
-  @objc(startSelfieAcquisition:withAcquisitionId:withResolver:withRejecter:)
-  func startSelfieAcquisition(
-    _ startToken: String,
-    acquisitionId: String,
-    resolve: @escaping RCTPromiseResolveBlock,
-    reject: @escaping RCTPromiseRejectBlock
-  ) -> Void {
-    runBlockOnMain { [weak self] in
-      guard let self = self else { return }
-      do {
-        try TSIdentityVerification.startSelfieAcquisition(
-          startToken: startToken.isEmpty ? nil : startToken,
-          acquisitionId: acquisitionId.isEmpty ? nil : acquisitionId
-        )
-        resolve(true)
-      } catch {
-        reject(self.kTag, "Error during startSelfieAcquisition", error)
-      }
-    }
-  }
-
   // MARK: - Delegate registration
   
   /// Registers every status delegate in one place, so the two initialization
@@ -170,7 +117,6 @@ class TsIdv: RCTEventEmitter {
     TSIdentityVerification.delegate = self
     TSIdentityVerification.faceAuthDelegate = self
     TSIdentityVerification.mosaicUIDelegate = self
-    TSIdentityVerification.modularVerificationDelegate = self
   }
   
   // MARK: - Threading
@@ -288,21 +234,3 @@ extension TsIdv: TSIdentityVerificationMosaicUIDelegate {
   }
 }
 
-extension TsIdv: TSModularVerificationDelegate {
-
-  func modularVerificationDidStartCapturing() {
-    reportIDVStatusChange(.modularVerificationDidStartCapturing)
-  }
-
-  func modularVerificationDidComplete() {
-    reportIDVStatusChange(.modularVerificationDidComplete)
-  }
-
-  func modularVerificationDidCancel() {
-    reportIDVStatusChange(.modularVerificationDidCancel)
-  }
-
-  func modularVerificationDidFail(with error: TSIdentityVerificationError) {
-    reportIDVStatusChange(.modularVerificationDidFail, additionalData: ["error": String(describing: error)])
-  }
-}
