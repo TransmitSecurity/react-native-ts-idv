@@ -135,6 +135,40 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
     promise.resolve(true)
   }
 
+  /**
+   * Modular IDV: standalone document capture. Not available on Android.
+   *
+   * The Android SDK does implement modular acquisition, but every entry point
+   * is internal — TSIDVManager, TSIDVController and IDVInternal are all
+   * `internal object`/`internal class`, and the public TSIdentityVerification
+   * facade exposes no modular API. It is reached by the IDO SDK through
+   * reflection (see IDVOptions.fromMap), not by applications, so the plugin
+   * cannot call it from a separate module.
+   *
+   * Rejecting with "not_implemented" rather than resolving means the caller
+   * cannot mistake this for success, and gives an automation suite one
+   * assertable string on both platforms. Revisit if the Android SDK promotes
+   * these APIs to public.
+   */
+  // Parameters are unused but kept so the bridge signature matches iOS: JS calls
+  // the same shape on both platforms and only the outcome differs.
+  @Suppress("UNUSED_PARAMETER")
+  @ReactMethod
+  fun startDocumentAcquisition(startToken: String, acquisitionId: String, promise: Promise) {
+    Log.d(TAG, "startDocumentAcquisition is not implemented on Android")
+    promise.reject("not_implemented", "startDocumentAcquisition is not implemented on Android")
+  }
+
+  /** Modular IDV: standalone selfie capture. See startDocumentAcquisition. */
+  // Parameters are unused but kept so the bridge signature matches iOS: JS calls
+  // the same shape on both platforms and only the outcome differs.
+  @Suppress("UNUSED_PARAMETER")
+  @ReactMethod
+  fun startSelfieAcquisition(startToken: String, acquisitionId: String, promise: Promise) {
+    Log.d(TAG, "startSelfieAcquisition is not implemented on Android")
+    promise.reject("not_implemented", "startSelfieAcquisition is not implemented on Android")
+  }
+
   //endregion
 
   // region Verification Status Sending Events to JavaScript

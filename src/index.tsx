@@ -25,7 +25,13 @@ export namespace TSIDV {
     verificationStatusError,
     recaptureNotRequired,
     genericServerError,
-    networkError
+    networkError,
+    // Appended rather than inserted so the existing numeric values stay put.
+    // initializationError is iOS-only; notInitialized maps to Android's
+    // SdkNotInitialized; configFetchError exists on both.
+    initializationError,
+    notInitialized,
+    configFetchError
   }
 
   export const enum IDVLogLevel {
@@ -52,6 +58,8 @@ export interface TSIdentityVerificationModule {
   recapture: () => Promise<void>;
   startFaceAuth: (deviceSessionId: string) => Promise<void>;
   startMosaicUI: (startToken: string) => Promise<void>;
+  startDocumentAcquisition: (startToken?: string, acquisitionId?: string) => Promise<void>;
+  startSelfieAcquisition: (startToken?: string, acquisitionId?: string) => Promise<void>;
 }
 
 class IdentityVerification implements TSIdentityVerificationModule {
@@ -82,6 +90,29 @@ class IdentityVerification implements TSIdentityVerificationModule {
 
   public startMosaicUI = async (startToken: string): Promise<void> => {
     return TsIdv.startMosaicUI(startToken);
+  }
+
+  /**
+   * Starts a standalone document acquisition (Modular IDV).
+   *
+   * iOS only. The Android SDK implements modular acquisition but keeps every
+   * entry point internal — it is consumed by the IDO SDK, not by applications —
+   * so on Android this rejects with the code "not_implemented" rather than
+   * failing silently.
+   *
+   * Both arguments are optional, matching the native signature. Empty strings
+   * are treated as absent.
+   */
+  public startDocumentAcquisition = async (startToken?: string, acquisitionId?: string): Promise<void> => {
+    return TsIdv.startDocumentAcquisition(startToken ?? "", acquisitionId ?? "");
+  }
+
+  /**
+   * Starts a standalone selfie acquisition (Modular IDV).
+   * iOS only — see startDocumentAcquisition.
+   */
+  public startSelfieAcquisition = async (startToken?: string, acquisitionId?: string): Promise<void> => {
+    return TsIdv.startSelfieAcquisition(startToken ?? "", acquisitionId ?? "");
   }
 }
 export default new IdentityVerification();
