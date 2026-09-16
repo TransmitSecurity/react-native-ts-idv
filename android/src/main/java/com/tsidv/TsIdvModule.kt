@@ -88,11 +88,13 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
   @ReactMethod
   fun startIdentityVerification(startToken: String, promise: Promise) {
     Log.d(TAG, "startIdentityVerification")
-    if (currentActivity == null) {
+    // Read once into a local: the activity can be torn down between a check and
+    // a second read, which would make a !! assertion throw.
+    val activity = getCurrentActivity()
+    if (activity == null) {
       promise.reject("Error during startIdentityVerification", "currentActivity is NULL")
       return
     }
-    val activity = currentActivity!!
     TSIdentityVerification.start(activity, startToken)
     promise.resolve(true)
   }
@@ -100,11 +102,11 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
   @ReactMethod
   fun startMosaicUI(startToken: String, promise: Promise) {
     Log.d(TAG, "startMosaicUI")
-    if (currentActivity == null) {
+    val activity = getCurrentActivity()
+    if (activity == null) {
       promise.reject("Error during startMosaicUI", "currentActivity is NULL")
       return
     }
-    val activity = currentActivity!!
     TSIdentityVerification.startWithSmartUI(activity, startToken);
     promise.resolve(true)
   }
@@ -112,23 +114,23 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
   @ReactMethod
   fun recapture() {
     Log.d(TAG,"recapture")
-    if (currentActivity == null) {
+    val activity = getCurrentActivity()
+    if (activity == null) {
       Log.d(TAG,"Error during recapture: currentActivity is NULL")
       return
     }
 
-    val activity = currentActivity!!
     TSIdentityVerification.recapture(activity)
   }
 
   @ReactMethod
   fun startFaceAuth(deviceSessionId: String, promise: Promise) {
     Log.d(TAG,"startFaceAuth")
-    if (currentActivity == null) {
+    val activity = getCurrentActivity()
+    if (activity == null) {
       promise.reject("Error during startFaceAuth", "currentActivity is NULL")
       return
     }
-    val activity = currentActivity!!
     TSIdentityVerification.startFaceAuth(activity, deviceSessionId)
     promise.resolve(true)
   }
