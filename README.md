@@ -37,11 +37,22 @@ npm install react-native-ts-idv
 # Or `yarn add react-native-ts-idv`
 ```
 
+#### Requirements
+| | Minimum |
+|---|---|
+| iOS | iOS 13.0, Xcode 16 (the native SDK is built with Swift 6) |
+| Android | minSdk 21, compileSdk 34, Kotlin 1.9, JDK 17 for the build |
+| Native SDK | IdentityVerification **1.3.5** on both platforms, pinned exactly |
+
+The native SDK is pinned to an exact version on both platforms. Your app can't select a different IdentityVerification version without a new release of this module, and a Podfile that already pins another IdentityVerification version won't resolve.
+
+**Other Mosaic SDKs in the same app.** IdentityVerification 1.3.5 brings AccountProtection 3.x and the Mosaic core SDK 1.1.x with it (Android: `com.ts.sdk:accountprotection:3.0.3`, `com.ts.sdk:core:1.1.1`; iOS: `AccountProtection ~> 3.0.3`, `TSCoreSDK ~> 1.1.5`). If your app also uses another Mosaic SDK or React Native module that needs AccountProtection 2.x or core 1.0.x, update it too. Otherwise CocoaPods won't resolve, and on Android the older SDK can fail at runtime with `NoSuchMethodError`. On Android, apps that also ship the Authentication SDK 1.0.29 or 1.0.30 must update it: those versions call a core method that core 1.1.1 no longer has, and key deletion crashes.
+
 #### iOS Setup
 You might need to execute `pod install` in your project's `/ios` folder and set your minimum iOS target to 13.0 in your Podfile (e.g `platform :ios, 13.0`).
 
 #### Android Setup
-Add to `app/build.gradle` under repositories
+Add the Transmit Security repository to your **root** `build.gradle` under `allprojects { repositories { … } }`, or to `dependencyResolutionManagement { repositories { … } }` in `settings.gradle`:
 
 ```gradle
 repositories {
@@ -53,6 +64,10 @@ repositories {
 Note:  
 As for projects on Gradle 8+ and Kotlin 1.8+ build will fail if the JDK version between 
 compileKotlin and compileJava and jvmTarget are not aligned. 
+
+The native SDK pulls in `com.google.android.gms:play-services-location:20.0.0` through the core SDK. If your app forces `play-services-location` 21 or later, location collection used by fraud signals can fail at runtime.
+
+The SDK's consumer ProGuard rules keep every class that implements `android.os.Parcelable` in your app. Expect release builds to keep those classes unobfuscated.
 
 ## Platform Configuration File
 Configure your Client ID and Base URL
@@ -94,6 +109,14 @@ Configure your Client ID and Base URL
 ## Add camera permission
 For module usage, configuring permissions for the device camera on both iOS and Android is necessary. You must also explicitly request user permission before commencing the identity verification process. See the `/example` project to learn more.
 
+## NFC document reading (iOS)
+When NFC chip reading is enabled for your tenant, the iOS SDK reads the passport or ID chip during verification. Apps that can receive this step must:
+1. Add the **Near Field Communication Tag Reading** capability (entitlement `com.apple.developer.nfc.readersession.formats` with `TAG`).
+2. Add `NFCReaderUsageDescription` to `Info.plist`.
+3. Add `com.apple.developer.nfc.readersession.iso7816.select-identifiers` to `Info.plist` with the value `A0000002471001`.
+
+Known issue: on a device without NFC hardware, the NFC step does not complete. If your tenant enables NFC reading, make sure your users' devices support it.
+
 ## Usage
 
 #### Module Setup
@@ -111,7 +134,13 @@ componentDidMount(): void {
 
 private onAppReady = async (): Promise<void> => {
     
+    // Reads the client ID and base URL from TransmitSecurity.plist (iOS) / strings.xml (Android).
+    // Rejects if they are missing.
     await IdentityVerification.initializeSDK();
+    // Or pass them in code. The base URL is honored on both platforms:
+    // await IdentityVerification.initialize(CLIENT_ID, TSIDV.BaseURL.eu);
+    // iOS only: initialize from a different configuration plist. Rejects on Android.
+    // await IdentityVerification.initializeSDK("MyConfiguration");
     
     // Register to receive status updates
     this.verificationStatusChangeSub = eventEmitter.addListener(
@@ -181,6 +210,34 @@ private onVerificationStatusChange = (params: any) => {
 }
 ```
 
+### Handling errors
+Failure events (`verificationDidFail`, `faceAuthenticationDidFail`, `mosaicUIVerificationDidFail`) and `verificationRequiresRecapture` carry two fields in `additionalData`:
+- `errorCode`: the same value on Android and iOS. Compare it with `TSIDV.ErrorCode` (failures) or `TSIDV.RecaptureReasonCode` (recapture). For `RecaptureReasonCode.other`, `error` carries the server's reason text.
+- `error`: the platform-specific value from earlier versions, kept for backward compatibility.
+
+```js
+case VerificationStatus.verificationDidFail:
+    if (additionalData.errorCode === TSIDV.ErrorCode.configFetchError) {
+        // The SDK could not load its configuration: check the base URL and the network.
+    }
+    break;
+```
+
+Since native SDK 1.3.3, every start fetches the SDK configuration first. If that fails (no network, wrong base URL, or IDV disabled for the tenant), the flow fails with `configFetchError` or `sdkDisabled` before a session starts.
+
+When a method's promise rejects, `error.userInfo.errorCode` holds a `TSIDV.RejectCode` (for example `noActivity` on Android when there is no foreground activity).
+
+## Mosaic UI verification
+`startMosaicUI(startToken)` runs the verification with Mosaic-provided screens. Handle its events alongside the ones above:
+
+```js
+case "mosaicUIVerificationDidComplete": // fetch the results from your server
+case "mosaicUIVerificationDidCancel":
+case "mosaicUIVerificationDidFail":     // additionalData.errorCode, as above
+```
+
+Known issue (iOS): if the configuration fetch fails when Mosaic UI starts, the SDK shows its error screen but sends no `mosaicUIVerificationDidFail` event.
+
 ## Obtaining verification results
 Once the module emits the `verificationDidComplete` event, you can fetch the results from your server as described in [Step 10: Handle verification result](https://developer.transmitsecurity.com/guides/verify/quick_start_ios/#step-10-handle-verification-result) 
 
@@ -242,7 +299,11 @@ private onVerificationStatusChange = (params: any) => {
 
 ## Setting Log Level
 This module provides the `setLogLevel: (logLevel: TSIDV.IDVLogLevel) => Promise<void>` API, allowing you to configure the SDK log level.
-Android: Setting the log level to off disables all logging. Any other valid `IDVLogLevel` will enable logging.
+Android: Setting the log level to off disables all logging. Any other valid `IDVLogLevel` will enable logging. Both platforms reject a value that is not an `IDVLogLevel`.
+
+## Platform notes
+- **iOS:** the core SDK links CoreLocation, CoreMotion, CoreTelephony, AVFoundation and ExternalAccessory, which the fraud signals use. Expect a larger binary.
+- **iOS:** the SDK keeps some state in the keychain. If the keychain can't be read the first time the SDK uses it (for example, the device is locked during a background launch), that state stays unavailable until the app restarts.
 
 ## Important Notes
 1. Make sure to use `idv_status_change_event` for the emitter event name.
