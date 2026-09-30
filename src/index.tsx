@@ -44,6 +44,47 @@ export namespace TSIDV {
     off = "off"
   }
 
+  /**
+   * Cross-platform value of `additionalData.errorCode` on the `*DidFail` status events.
+   * Identical on Android and iOS, unlike the legacy `additionalData.error` string.
+   * `initializationError` and `recaptureNotRequired` are only reported by iOS.
+   */
+  export const enum ErrorCode {
+    cameraPermissionRequired = "cameraPermissionRequired",
+    sdkDisabled = "sdkDisabled",
+    sessionNotValid = "sessionNotValid",
+    verificationStatusError = "verificationStatusError",
+    recaptureNotRequired = "recaptureNotRequired",
+    genericServerError = "genericServerError",
+    networkError = "networkError",
+    initializationError = "initializationError",
+    notInitialized = "notInitialized",
+    configFetchError = "configFetchError",
+    /** A native error this plugin version does not know yet. */
+    unknown = "unknown"
+  }
+
+  /**
+   * Cross-platform value of `additionalData.errorCode` on `verificationRequiresRecapture`.
+   * For `other`, `additionalData.error` carries the server's reason text.
+   */
+  export const enum RecaptureReasonCode {
+    imageMissing = "imageMissing",
+    docExpired = "docExpired",
+    docNotSupported = "docNotSupported",
+    docDamaged = "docDamaged",
+    poorImageQuality = "poorImageQuality",
+    other = "other",
+    unknown = "unknown"
+  }
+
+  /** Value of `error.userInfo.errorCode` when a method's promise rejects. */
+  export const enum RejectCode {
+    noActivity = "noActivity",
+    initializationError = "initializationError",
+    invalidLogLevel = "invalidLogLevel"
+  }
+
   export const enum BaseURL {
     us = "https://api.transmitsecurity.io",
     eu = "https://api.eu.transmitsecurity.io"

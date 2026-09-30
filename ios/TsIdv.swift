@@ -8,6 +8,8 @@ class TsIdv: RCTEventEmitter {
   private let kTag = "IdentityVerification"
   private static let IDVStatusChangeEventName = "idv_status_change_event"
   private var isListening: Bool = false
+  /// True from `startMosaicUI` until a Mosaic UI terminal event. See `reclaimVerificationDelegate`.
+  private var isMosaicUIActive: Bool = false
   
   private enum IDVStatusType: String {
     case verificationDidCancel
@@ -50,7 +52,7 @@ class TsIdv: RCTEventEmitter {
           self.registerDelegates()
           resolve(true)
         } catch {
-          reject(self.kTag, "Error during initializeSDK", error)
+          reject(self.kTag, "Error during initializeSDK", TsIdvCodes.rejectError(.initializationError, underlying: error))
         }
       }
     }
@@ -66,9 +68,11 @@ class TsIdv: RCTEventEmitter {
   
   @objc(setLogLevel:withResolver:withRejecter:)
   func setLogLevel(_ jsLogLevel: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-    runBlockOnMain { [unowned self] in
+    // weak, not unowned: the module can be released on a bridge reload while this is queued.
+    runBlockOnMain { [weak self] in
+      guard let self = self else { return }
       guard let logLevel = self.parseLogLevel(jsLogLevel) else {
-        reject(self.kTag, "Invalid log level provider", nil)
+        reject(self.kTag, "Invalid log level provider", TsIdvCodes.rejectError(.invalidLogLevel))
         return
       }
       TSIdentityVerification.setLogLevel(logLevel)
@@ -79,6 +83,7 @@ class TsIdv: RCTEventEmitter {
   @objc(startIdentityVerification:withResolver:withRejecter:)
   func startIdentityVerification(_ startToken: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
     runBlockOnMain {
+      self.reclaimVerificationDelegate()
       TSIdentityVerification.start(startToken: startToken)
       resolve(true)
     }
@@ -103,6 +108,7 @@ class TsIdv: RCTEventEmitter {
   @objc(startMosaicUI:withResolver:withRejecter:)
   func startMosaicUI(_ startToken: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
     runBlockOnMain {
+      self.isMosaicUIActive = true
       TSIdentityVerification.startMosaicUI(startToken: startToken)
       resolve(true)
     }
@@ -114,11 +120,26 @@ class TsIdv: RCTEventEmitter {
   /// entry points cannot drift. Previously `initializeSDK` set only `delegate`,
   /// leaving face authentication and Mosaic UI status events undelivered.
   private func registerDelegates() {
+    // Re-initializing is the recovery path when a Mosaic UI flow never reported a terminal
+    // event (e.g. a config-fetch failure on iOS 1.3.5 skips the Mosaic UI delegate), so the
+    // flag must not outlive it.
+    isMosaicUIActive = false
     TSIdentityVerification.delegate = self
     TSIdentityVerification.faceAuthDelegate = self
     TSIdentityVerification.mosaicUIDelegate = self
   }
   
+  /// `startMosaicUI` makes the SDK install its own Mosaic UI controller as the verification
+  /// delegate, replacing this module. Without reclaiming it, a later `startIdentityVerification`
+  /// reports its status to that controller and JavaScript receives no events.
+  ///
+  /// Skipped while a Mosaic UI flow is still running: taking the delegate then would starve that
+  /// flow of the events it needs to finish, and the SDK ignores a second start anyway.
+  private func reclaimVerificationDelegate() {
+    guard !isMosaicUIActive else { return }
+    TSIdentityVerification.delegate = self
+  }
+
   // MARK: - Threading
   
   private func runBlockOnMain(_ block: @escaping () -> Void) {
@@ -155,6 +176,16 @@ class TsIdv: RCTEventEmitter {
   
   // MARK: - Helpers
   
+  /// `error` is the case name, as `verificationDidFail` already sent. Face authentication and
+  /// Mosaic UI used `localizedDescription`, which for this plain Swift enum is only
+  /// "The operation couldn't be completed… error N." `errorCode` is cross-platform.
+  private func errorData(_ error: TSIdentityVerificationError) -> [String: String] {
+    return [
+      "error": String(describing: error),
+      "errorCode": TsIdvCodes.code(for: error)
+    ]
+  }
+
   private func parseLogLevel(_ jsLogLevel: String) -> TSLogLevel? {
     switch jsLogLevel {
     case "verbose": return .verbose
@@ -179,7 +210,7 @@ extension TsIdv: TSIdentityVerificationDelegate {
   }
   
   func verificationDidFail(with error: TSIdentityVerificationError) {
-    reportIDVStatusChange(.verificationDidFail, additionalData: ["error": String(describing: error)])
+    reportIDVStatusChange(.verificationDidFail, additionalData: errorData(error))
   }
   
   func verificationDidStartCapturing() {
@@ -191,7 +222,10 @@ extension TsIdv: TSIdentityVerificationDelegate {
   }
   
   func verificationRequiresRecapture(reason: TSRecaptureReason) {
-    reportIDVStatusChange(.verificationRequiresRecapture, additionalData: ["error": reason.description])
+    reportIDVStatusChange(.verificationRequiresRecapture, additionalData: [
+      "error": reason.description,
+      "errorCode": TsIdvCodes.code(for: reason)
+    ])
   }
 }
 
@@ -214,7 +248,7 @@ extension TsIdv: TSIdentityFaceAuthenticationDelegate {
   }
   
   func faceAuthenticationDidFail(with error: TSIdentityVerificationError) {
-    reportIDVStatusChange(.faceAuthenticationDidFail, additionalData: ["error": error.localizedDescription])
+    reportIDVStatusChange(.faceAuthenticationDidFail, additionalData: errorData(error))
   }
 }
 
@@ -222,15 +256,18 @@ extension TsIdv: TSIdentityFaceAuthenticationDelegate {
 extension TsIdv: TSIdentityVerificationMosaicUIDelegate {
   
   func mosaicUIVerificationDidComplete() {
+    isMosaicUIActive = false
     reportIDVStatusChange(.mosaicUIVerificationDidComplete)
   }
   
   func mosaicUIVerificationDidCancel() {
+    isMosaicUIActive = false
     reportIDVStatusChange(.mosaicUIVerificationDidCancel)
   }
   
   func mosaicUIVerificationDidFail(with error: TSIdentityVerificationError) {
-    reportIDVStatusChange(.mosaicUIVerificationDidFail, additionalData: ["error": error.localizedDescription])
+    isMosaicUIActive = false
+    reportIDVStatusChange(.mosaicUIVerificationDidFail, additionalData: errorData(error))
   }
 }
 

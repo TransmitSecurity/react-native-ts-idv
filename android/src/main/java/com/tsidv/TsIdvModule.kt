@@ -17,6 +17,7 @@ import com.transmit.identityverification.TSIdentityVerification.registerForStatu
 import com.transmit.identityverification.TSIdentityVerification.start
 import com.transmit.identityverification.TSIdentityVerificationError
 import com.transmit.identityverification.TSRecaptureReason
+import com.transmit.identityverification.exceptions.TSIdentityVerificationInitializeException
 import com.ts.coresdk.TSLog
 
 class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext),
@@ -31,6 +32,8 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
 
   companion object {
     const val NAME = "TsIdv"
+    // Same set the iOS bridge accepts (IDVLogLevel in src/index.tsx).
+    private val SUPPORTED_LOG_LEVELS = setOf("verbose", "debug", "info", "warning", "error", "crytical", "off")
   }
 
   enum class IDVStatusType(val status: String) {
@@ -61,7 +64,14 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
   @ReactMethod
   fun initializeSDK(promise: Promise) {
     Log.d(TAG, "Identity Verification SDK initializeSDK")
-    TSIdentityVerification.initializeSDK(reactContext)
+    // The native call throws when transmit_security_client_id / transmit_security_base_url
+    // are missing from strings.xml. Uncaught, that crashes the app; reject instead, as iOS does.
+    try {
+      TSIdentityVerification.initializeSDK(reactContext)
+    } catch (e: TSIdentityVerificationInitializeException) {
+      promise.reject("Error during initializeSDK", e.message, e, rejectInfo(IdvErrorCodes.Reject.INITIALIZATION_ERROR))
+      return
+    }
     registerSDKStatus()
     promise.resolve(true);
   }
@@ -69,7 +79,15 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
   @ReactMethod
   fun initialize(clientId: String, baseURL: String, promise: Promise) {
     Log.d(TAG,"Identity Verification SDK initialize")
-    TSIdentityVerification.initialize(reactContext, clientId)
+    // Pass the base URL through: since native 1.3.3 the SDK fetches its configuration from
+    // it before every start, so dropping it sent non-US tenants to the US default and failed
+    // with ConfigFetchError. A blank value keeps the SDK's own default, which is what the
+    // 2-argument overload used to give every caller.
+    if (baseURL.isBlank()) {
+      TSIdentityVerification.initialize(reactContext, clientId)
+    } else {
+      TSIdentityVerification.initialize(reactContext, clientId, baseURL)
+    }
     registerSDKStatus()
     promise.resolve(true);
   }
@@ -77,6 +95,12 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
   @ReactMethod
   fun setLogLevel(jsLogLevel: String, promise: Promise) {
     Log.d(TAG,"Identity Verification setLogLevel")
+    // Reject unknown levels, matching iOS. Before this, Android enabled logging for any
+    // string other than "off", so a typo succeeded on one platform and failed on the other.
+    if (jsLogLevel !in SUPPORTED_LOG_LEVELS) {
+      promise.reject("Error during setLogLevel", "Invalid log level provided: $jsLogLevel", rejectInfo(IdvErrorCodes.Reject.INVALID_LOG_LEVEL))
+      return
+    }
     // The Android SDK exposes logging as a boolean, so every level other than
     // "off" enables it. Uses == (structural equality); === is reference equality
     // on a Kotlin String and matched only when both sides happened to be interned.
@@ -92,7 +116,7 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
     // a second read, which would make a !! assertion throw.
     val activity = getCurrentActivity()
     if (activity == null) {
-      promise.reject("Error during startIdentityVerification", "currentActivity is NULL")
+      promise.reject("Error during startIdentityVerification", "currentActivity is NULL", noActivityInfo())
       return
     }
     TSIdentityVerification.start(activity, startToken)
@@ -104,7 +128,7 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
     Log.d(TAG, "startMosaicUI")
     val activity = getCurrentActivity()
     if (activity == null) {
-      promise.reject("Error during startMosaicUI", "currentActivity is NULL")
+      promise.reject("Error during startMosaicUI", "currentActivity is NULL", noActivityInfo())
       return
     }
     TSIdentityVerification.startWithSmartUI(activity, startToken);
@@ -112,15 +136,18 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
   }
 
   @ReactMethod
-  fun recapture() {
+  fun recapture(promise: Promise) {
     Log.d(TAG,"recapture")
+    // Takes a promise like every other method and like iOS. It used to return nothing, so a
+    // missing activity was only logged and the caller's await resolved as if it had worked.
     val activity = getCurrentActivity()
     if (activity == null) {
-      Log.d(TAG,"Error during recapture: currentActivity is NULL")
+      promise.reject("Error during recapture", "currentActivity is NULL", noActivityInfo())
       return
     }
 
     TSIdentityVerification.recapture(activity)
+    promise.resolve(true)
   }
 
   @ReactMethod
@@ -128,7 +155,7 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
     Log.d(TAG,"startFaceAuth")
     val activity = getCurrentActivity()
     if (activity == null) {
-      promise.reject("Error during startFaceAuth", "currentActivity is NULL")
+      promise.reject("Error during startFaceAuth", "currentActivity is NULL", noActivityInfo())
       return
     }
     TSIdentityVerification.startFaceAuth(activity, deviceSessionId)
@@ -171,15 +198,14 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
 
   override fun verificationFail(error: TSIdentityVerificationError) {
     Log.d(TAG,"verification Status: Verification Fail $error")
-    val errorMap: WritableMap = Arguments.createMap()
-    errorMap.putString("error", error.name)
-    reportIDVStatusChange(IDVStatusType.VerificationDidFail.status, errorMap)
+    reportIDVStatusChange(IDVStatusType.VerificationDidFail.status, errorData(error))
   }
 
   override fun verificationRequiresRecapture(reason: TSRecaptureReason?) {
     Log.d(TAG,"verification Status: Requires Recapture $reason")
     val errorMap: WritableMap = Arguments.createMap()
-    errorMap.putString("error", reason?.toString())
+    errorMap.putString("error", IdvErrorCodes.recaptureReasonText(reason))
+    errorMap.putString("errorCode", IdvErrorCodes.from(reason))
     reportIDVStatusChange(IDVStatusType.VerificationRequiresRecapture.status, errorMap)
   }
 
@@ -215,9 +241,7 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
 
   override fun faceAuthenticationFail(error: TSIdentityVerificationError) {
     Log.d(TAG,"FaceAuth: Authentication Failed $error")
-    val errorMap: WritableMap = Arguments.createMap()
-    errorMap.putString("error", error.name)
-    reportIDVStatusChange(FaceAuthStatusType.FaceAuthenticationFail.status, errorMap)
+    reportIDVStatusChange(FaceAuthStatusType.FaceAuthenticationFail.status, errorData(error))
   }
 
   // endregion
@@ -234,14 +258,29 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
 
   override fun mosaicUIVerificationFailed(error: TSIdentityVerificationError) {
     Log.d("MosaicUI verificationDidFail", error.name)
-    val errorMap: WritableMap = Arguments.createMap()
-    errorMap.putString("error", error.name)
-    reportIDVStatusChange(MosaicUIAuthStatusType.mosaicUIVerificationDidFail.status, errorMap)
+    reportIDVStatusChange(MosaicUIAuthStatusType.mosaicUIVerificationDidFail.status, errorData(error))
   }
 
   // endregion
 
   // region Helpers
+
+  /** `error` keeps the native enum name for existing callers; `errorCode` is cross-platform. */
+  private fun errorData(error: TSIdentityVerificationError): WritableMap {
+    val errorMap: WritableMap = Arguments.createMap()
+    errorMap.putString("error", error.name)
+    errorMap.putString("errorCode", IdvErrorCodes.from(error))
+    return errorMap
+  }
+
+  private fun noActivityInfo(): WritableMap = rejectInfo(IdvErrorCodes.Reject.NO_ACTIVITY)
+
+  /** Rejection codes stay as they were; the stable code is added in `userInfo.errorCode`. */
+  private fun rejectInfo(errorCode: String): WritableMap {
+    val info = Arguments.createMap()
+    info.putString("errorCode", errorCode)
+    return info
+  }
 
   private fun registerSDKStatus() {
     registerForStatus(this)
