@@ -99,6 +99,8 @@ dependencies {
   //noinspection GradleDynamicVersion
   implementation "com.facebook.react:react-native:+"
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+  // Exact pin, kept in step with the podspec. Gradle still lets a host app that declares a
+  // newer identityverification win conflict resolution; iOS has no such escape hatch.
   implementation("com.ts.sdk:identityverification:1.3.5")
 }
 
