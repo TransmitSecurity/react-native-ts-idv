@@ -3,6 +3,8 @@
 @interface RCT_EXTERN_MODULE(TsIdv, NSObject)
 
 RCT_EXTERN_METHOD(initializeSDK:(RCTPromiseResolveBlock)resolve withRejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXTERN_METHOD(initializeSDKWithConfiguration:(NSString *)configurationFileName withResolver:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(initialize:(NSString *)clientId withBaseUrl:(NSString *)baseUrl withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(setLogLevel:(NSString *)jsLogLevel withResolver:(RCTPromiseResolveBlock)resolve
