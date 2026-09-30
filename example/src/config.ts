@@ -8,6 +8,11 @@ export default {
     * Add those files to the native projects before switching.
     */
     initMode: "clientId" as "clientId" | "resources",
+    /*
+    * iOS only, with initMode "resources": initialize from this plist instead of the default one
+    * (initializeSDK(configurationFileName)). Android rejects it with errorCode "notSupported".
+    */
+    configurationFileName: undefined as string | undefined,
     idvStatusChangeEventName: "idv_status_change_event",
     /*
     * Don't keep the secret on the client side. This is just an example

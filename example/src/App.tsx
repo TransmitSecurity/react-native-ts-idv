@@ -232,7 +232,7 @@ export default class App extends React.Component<any, State> {
    */
   private initializeSDK = async (): Promise<void> => {
     if (config.initMode === "resources") {
-      await IdentityVerification.initializeSDK();
+      await IdentityVerification.initializeSDK(config.configurationFileName);
       return;
     }
     await IdentityVerification.initialize(config.clientId, config.baseAPIURL as TSIDV.BaseURL);
