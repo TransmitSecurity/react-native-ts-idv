@@ -12,6 +12,7 @@
 - **Fixed (Android):** `initializeSDK()` rejects when `strings.xml` is missing the client ID or base URL, instead of crashing the app.
 - **Fixed (Android):** `recapture()` now resolves, or rejects when there is no foreground activity. It used to return without an error.
 - **Fixed (Android):** `setLogLevel` rejects an unknown level, as iOS does.
+- **Fixed (Android):** Apps that minify with R8 no longer fail the release build with `Missing class kotlinx.parcelize.Parcelize`. The module now ships a consumer rule for it.
 - **Fixed (Android):** The recapture reason in `additionalData.error` is now the reason text (for example `image_missing`), matching iOS. It used to be an internal object name.
 - **Fixed (iOS):** `additionalData.error` for face authentication and Mosaic UI failures is now the error name (for example `configFetchError`), matching identity verification. It used to be a generic system message.
 - **Fixed (iOS):** Identity verification started after a Mosaic UI flow now reports its status events. They used to go to the SDK instead of the app.
