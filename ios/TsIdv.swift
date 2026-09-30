@@ -56,6 +56,29 @@ class TsIdv: RCTEventEmitter {
         }
       }
     }
+
+  @objc(initializeSDKWithConfiguration:withResolver:withRejecter:)
+  func initializeSDKWithConfiguration(
+    _ configurationFileName: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
+
+      runBlockOnMain { [weak self] in
+        guard let self = self else { return }
+
+        // An empty name cannot identify a plist; reject rather than let the SDK guess.
+        guard !configurationFileName.isEmpty else {
+          reject(self.kTag, "Error during initializeSDK: empty configuration file name", TsIdvCodes.rejectError(.initializationError))
+          return
+        }
+
+        do {
+          try TSIdentityVerification.initializeSDK(configuration: TSIdvConfiguration(configurationFileName: configurationFileName))
+          self.registerDelegates()
+          resolve(true)
+        } catch {
+          reject(self.kTag, "Error during initializeSDK", TsIdvCodes.rejectError(.initializationError, underlying: error))
+        }
+      }
+    }
   
   @objc(initialize:withBaseUrl:withResolver:withRejecter:)
   func initialize(_ clientId: String, baseUrl: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {

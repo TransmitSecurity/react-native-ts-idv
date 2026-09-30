@@ -76,6 +76,20 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
     promise.resolve(true);
   }
 
+  /**
+   * iOS-only: initializes from a named configuration plist. The Android SDK has no equivalent
+   * (it reads strings.xml), so this rejects with `notSupported` rather than silently falling back
+   * to a different configuration source than the caller asked for.
+   */
+  @ReactMethod
+  fun initializeSDKWithConfiguration(configurationFileName: String, promise: Promise) {
+    promise.reject(
+      "Error during initializeSDK",
+      "initializeSDK(configurationFileName) is not supported on Android; call initializeSDK() and configure strings.xml",
+      rejectInfo(IdvErrorCodes.Reject.NOT_SUPPORTED)
+    )
+  }
+
   @ReactMethod
   fun initialize(clientId: String, baseURL: String, promise: Promise) {
     Log.d(TAG,"Identity Verification SDK initialize")

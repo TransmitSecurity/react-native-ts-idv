@@ -57,5 +57,6 @@ internal object IdvErrorCodes {
     const val NO_ACTIVITY = "noActivity"
     const val INITIALIZATION_ERROR = "initializationError"
     const val INVALID_LOG_LEVEL = "invalidLogLevel"
+    const val NOT_SUPPORTED = "notSupported"
   }
 }

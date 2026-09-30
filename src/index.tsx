@@ -82,7 +82,8 @@ export namespace TSIDV {
   export const enum RejectCode {
     noActivity = "noActivity",
     initializationError = "initializationError",
-    invalidLogLevel = "invalidLogLevel"
+    invalidLogLevel = "invalidLogLevel",
+    notSupported = "notSupported"
   }
 
   export const enum BaseURL {
@@ -92,7 +93,12 @@ export namespace TSIDV {
 }
 
 export interface TSIdentityVerificationModule {
-  initializeSDK: () => Promise<void>;
+  /**
+   * Initializes from the app's resources: `strings.xml` on Android, the default configuration
+   * plist on iOS. `configurationFileName` selects a different plist and is iOS-only; on
+   * Android it rejects with `RejectCode.notSupported`.
+   */
+  initializeSDK: (configurationFileName?: string) => Promise<void>;
   initialize: (clientId: string, baseUrl: TSIDV.BaseURL) => Promise<void>;
   startIdentityVerification: (startToken: string) => Promise<void>;
   setLogLevel: (logLevel: TSIDV.IDVLogLevel) => Promise<void>;
@@ -103,8 +109,12 @@ export interface TSIdentityVerificationModule {
 
 class IdentityVerification implements TSIdentityVerificationModule {
 
-  public initializeSDK = async (): Promise<void> => {
-    return TsIdv.initializeSDK();
+  public initializeSDK = async (configurationFileName?: string): Promise<void> => {
+    // A separate native method keeps the existing initializeSDK bridge signature unchanged.
+    if (configurationFileName === undefined) {
+      return TsIdv.initializeSDK();
+    }
+    return TsIdv.initializeSDKWithConfiguration(configurationFileName);
   }
 
   public initialize = async (clientId: string, baseUrl: TSIDV.BaseURL = TSIDV.BaseURL.us): Promise<void> => {
