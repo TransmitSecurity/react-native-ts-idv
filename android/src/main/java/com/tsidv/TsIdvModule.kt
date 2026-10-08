@@ -128,7 +128,7 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
     Log.d(TAG, "startIdentityVerification")
     // Read once into a local: the activity can be torn down between a check and
     // a second read, which would make a !! assertion throw.
-    val activity = getCurrentActivity()
+    val activity = reactContext.currentActivity
     if (activity == null) {
       promise.reject("Error during startIdentityVerification", "currentActivity is NULL", noActivityInfo())
       return
@@ -140,7 +140,7 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
   @ReactMethod
   fun startMosaicUI(startToken: String, promise: Promise) {
     Log.d(TAG, "startMosaicUI")
-    val activity = getCurrentActivity()
+    val activity = reactContext.currentActivity
     if (activity == null) {
       promise.reject("Error during startMosaicUI", "currentActivity is NULL", noActivityInfo())
       return
@@ -154,7 +154,7 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
     Log.d(TAG,"recapture")
     // Takes a promise like every other method and like iOS. It used to return nothing, so a
     // missing activity was only logged and the caller's await resolved as if it had worked.
-    val activity = getCurrentActivity()
+    val activity = reactContext.currentActivity
     if (activity == null) {
       promise.reject("Error during recapture", "currentActivity is NULL", noActivityInfo())
       return
@@ -167,7 +167,7 @@ class TsIdvModule(private val reactContext: ReactApplicationContext) : ReactCont
   @ReactMethod
   fun startFaceAuth(deviceSessionId: String, promise: Promise) {
     Log.d(TAG,"startFaceAuth")
-    val activity = getCurrentActivity()
+    val activity = reactContext.currentActivity
     if (activity == null) {
       promise.reject("Error during startFaceAuth", "currentActivity is NULL", noActivityInfo())
       return
