@@ -19,7 +19,7 @@
 - **Fixed (iOS):** A possible crash in `setLogLevel` when the JavaScript bridge reloads.
 - **Behavior (native 1.3.3+):** Every start fetches the SDK configuration first, and fails with `configFetchError` or `sdkDisabled` before a session starts if that fails.
 - **Behavior (iOS):** The core SDK no longer excludes the arm64 simulator architecture from the app target.
-- **Known issues (iOS):** A configuration fetch failure when Mosaic UI starts sends no `mosaicUIVerificationDidFail` event. The NFC chip-reading step doesn't complete on devices without NFC. See the README for the NFC setup.
+- **Known issues (iOS):** A configuration fetch failure when Mosaic UI starts sends no `mosaicUIVerificationDidFail` event. The NFC chip-reading step doesn't complete on devices without NFC. See the README for the NFC setup. In apps built with Xcode 27, the app can crash when the native SDK requests camera access itself, for example when face authentication starts after the user has denied the camera. To avoid it, start the SDK only when camera access is authorized.
 
 ## Version 1.0.10, November 2025
 
