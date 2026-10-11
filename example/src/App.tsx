@@ -9,7 +9,7 @@ import React from 'react';
 import {
   NativeModules, NativeEventEmitter, SafeAreaView,
   type EmitterSubscription, ActivityIndicator, View,
-  StyleSheet, Platform, Alert, PermissionsAndroid
+  StyleSheet, Alert
 } from 'react-native';
 import MockServer, {
   type AccessTokenResponse, type FaceAuthSessionResponse, type VerificationResultsResponse,
@@ -23,6 +23,8 @@ import RequireRecaptureDialog from './require-recapture-dialog';
 import IdentityVerification, { TSIDV } from 'react-native-ts-idv';
 
 import config from './config';
+import { VerificationStatus, describeFailure, describeRecapture } from './idv-status';
+import { ensureCameraPermission } from './camera-permission';
 
 const { TsIdv } = NativeModules;
 const eventEmitter = new NativeEventEmitter(TsIdv);
@@ -35,25 +37,6 @@ export type State = {
   isProcessing: boolean;
   lastVerificationSessionID: string | null;
 };
-
-const enum VerificationStatus {
-  verificationDidCancel = "verificationDidCancel",
-  verificationDidComplete = "verificationDidComplete",
-  verificationDidFail = "verificationDidFail",
-  verificationDidStartCapturing = "verificationDidStartCapturing",
-  verificationDidStartProcessing = "verificationDidStartProcessing",
-  verificationRequiresRecapture = "verificationRequiresRecapture",
-
-  faceAuthenticationDidCancel = "faceAuthenticationDidCancel",
-  faceAuthenticationDidComplete = "faceAuthenticationDidComplete",
-  faceAuthenticationDidFail = "faceAuthenticationDidFail",
-  faceAuthenticationDidStartCapturing = "faceAuthenticationDidStartCapturing",
-  faceAuthenticationDidStartProcessing = "faceAuthenticationDidStartProcessing",
-
-  mosaicUIVerificationDidComplete = "mosaicUIVerificationDidComplete",
-  mosaicUIVerificationDidCancel = "mosaicUIVerificationDidCancel",
-  mosaicUIVerificationDidFail = "mosaicUIVerificationDidFail",
-}
 
 export default class App extends React.Component<any, State> {
 
@@ -88,6 +71,7 @@ export default class App extends React.Component<any, State> {
           onStartFaceAuth={this.onStartFaceAuth}
           onStartMosaicUI={this.onStartMosaicUI}
           isInSession={this.state.lastVerificationSessionID !== null}
+          sessionId={this.state.lastVerificationSessionID}
           errorMessage={this.state.errorMessage}
         />
         <VerificationResultsDialog
@@ -105,19 +89,24 @@ export default class App extends React.Component<any, State> {
     );
   }
 
-  private requestCameraPermissions = async (): Promise<void> => {
-    if (Platform.OS === "android") {
-      await this.requestCameraPermission();
-    } else if (Platform.OS === "ios") {
-      // Request camera permissions for iOS is done in the example app native code.
-    } else {
-      console.error("Unsupported platform");
+  /** Checks the camera right before a flow starts; shows an error and returns false if denied. */
+  private hasCameraPermission = async (): Promise<boolean> => {
+    const granted = await ensureCameraPermission();
+    if (!granted) {
+      this.setState({ errorMessage: "Camera permission is required to start verification" });
     }
+    return granted;
   }
 
-  private onRecapture = (): void => {
+  private onRecapture = async (): Promise<void> => {
     this.setState({ isRecaptureModalVisible: false });
-    IdentityVerification.recapture();
+    if (!(await this.hasCameraPermission())) return;
+    try {
+      await IdentityVerification.recapture();
+    } catch (error) {
+      this.logAppEvent(`Error during recapture: ${error}`);
+      this.setState({ errorMessage: `${error}` });
+    }
   }
 
   private renderProcessing = (): any => {
@@ -133,6 +122,7 @@ export default class App extends React.Component<any, State> {
   }
 
   onStartVerificationProcess = async (): Promise<void> => {
+    if (!(await this.hasCameraPermission())) return;
     try {
       const accessToken = this.accessTokenResponse?.token || "";
   
@@ -153,6 +143,8 @@ export default class App extends React.Component<any, State> {
       return;
     }
 
+    if (!(await this.hasCameraPermission())) return;
+
     this.setState({ isProcessing: true });
     this.accessTokenResponse = await this.mockServer.getAccessToken();
     const accessToken = this.accessTokenResponse?.token || "";
@@ -169,6 +161,7 @@ export default class App extends React.Component<any, State> {
   }
 
   onStartMosaicUI = async (): Promise<void> => {
+    if (!(await this.hasCameraPermission())) return;
     try {
       const accessToken = this.accessTokenResponse?.token || "";
   
@@ -216,16 +209,33 @@ export default class App extends React.Component<any, State> {
     }
 
     IdentityVerification.setLogLevel(TSIDV.IDVLogLevel.verbose);
-    await IdentityVerification.initialize(config.clientId);
+    try {
+      await this.initializeSDK();
+    } catch (error) {
+      this.logAppEvent(`Error initializing the SDK: ${error}`);
+      this.setState({ errorMessage: `${error}` });
+      return;
+    }
 
     this.registerForEvents();
-    this.requestCameraPermissions();
 
     try {
       this.accessTokenResponse = await this.mockServer.getAccessToken();
     } catch (error) {
       this.setState({ errorMessage: `${error}` });
     }
+  }
+
+  /**
+   * `resources` is the route the README documents for customers: the client ID and base URL come
+   * from strings.xml (Android) and the configuration plist (iOS). `clientId` passes them in code.
+   */
+  private initializeSDK = async (): Promise<void> => {
+    if (config.initMode === "resources") {
+      await IdentityVerification.initializeSDK(config.configurationFileName);
+      return;
+    }
+    await IdentityVerification.initialize(config.clientId, config.baseAPIURL as TSIDV.BaseURL);
   }
 
   private isAppConfigured = (): boolean => {
@@ -282,8 +292,7 @@ export default class App extends React.Component<any, State> {
         await this.handleIdentityVerificationComplete();
         break;
       case VerificationStatus.verificationDidFail:
-        const error: TSIDV.IdentityVerificationError = additionalData["error"];
-        this.setState({ errorMessage: `Verification Failed: ${error}`, isProcessing: false });
+        this.setState({ errorMessage: `Verification Failed: ${describeFailure(additionalData)}`, isProcessing: false });
         this.logAppEvent(`verificationDidFail`);
         break;
       case VerificationStatus.verificationDidStartCapturing:
@@ -295,9 +304,8 @@ export default class App extends React.Component<any, State> {
         this.setState({ errorMessage: ``, isProcessing: true });
         break;
       case VerificationStatus.verificationRequiresRecapture:
-        const reason: string = additionalData["error"];
-        this.setState({ errorMessage: `Require Recapture: ${reason}`, isProcessing: false, isRecaptureModalVisible: true });
-        this.logAppEvent(`verificationRequiresRecapture: ${additionalData}`);
+        this.setState({ errorMessage: `Require Recapture: ${describeRecapture(additionalData)}`, isProcessing: false, isRecaptureModalVisible: true });
+        this.logAppEvent(`verificationRequiresRecapture: ${JSON.stringify(additionalData)}`);
         break;
 
       // Face Authentication Events:
@@ -313,7 +321,7 @@ export default class App extends React.Component<any, State> {
         await this.handleFaceAuthComplete();
         break;
       case VerificationStatus.faceAuthenticationDidFail:
-        this.setState({ errorMessage: `Face Authentication Failed: ${additionalData["error"]}`, isProcessing: false });
+        this.setState({ errorMessage: `Face Authentication Failed: ${describeFailure(additionalData)}`, isProcessing: false });
         this.logAppEvent(`faceAuthenticationDidFail`);
         break;
       case VerificationStatus.faceAuthenticationDidStartCapturing:
@@ -323,6 +331,22 @@ export default class App extends React.Component<any, State> {
       case VerificationStatus.faceAuthenticationDidStartProcessing:
         this.logAppEvent(`faceAuthenticationDidStartProcessing`);
         this.setState({ errorMessage: ``, isProcessing: true });
+        break;
+
+      // Mosaic UI Events:
+      // ------------------------------
+      case VerificationStatus.mosaicUIVerificationDidComplete:
+        this.logAppEvent(`mosaicUIVerificationDidComplete`);
+        this.setState({ errorMessage: ``, isProcessing: false });
+        await this.handleIdentityVerificationComplete();
+        break;
+      case VerificationStatus.mosaicUIVerificationDidCancel:
+        this.setState({ errorMessage: `User Canceled`, isProcessing: false });
+        this.logAppEvent(`mosaicUIVerificationDidCancel`);
+        break;
+      case VerificationStatus.mosaicUIVerificationDidFail:
+        this.setState({ errorMessage: `Mosaic UI Verification Failed: ${describeFailure(additionalData)}`, isProcessing: false });
+        this.logAppEvent(`mosaicUIVerificationDidFail`);
         break;
       default:
         this.setState({ errorMessage: `Invalid status response`, isProcessing: false });
@@ -335,30 +359,6 @@ export default class App extends React.Component<any, State> {
   private logAppEvent = (event: string): void => {
     console.log(`IDV Example: ${event}`);
   }
-
-  private requestCameraPermission = async () => {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.CAMERA!,
-        {
-          title: 'Cool Photo App Camera Permission',
-          message:
-            'This App needs access to your camera ' +
-            'so you can scan your documents.',
-          buttonNeutral: 'Ask Me Later',
-          buttonNegative: 'Cancel',
-          buttonPositive: 'OK',
-        },
-      );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('You can use the camera');
-      } else {
-        console.log('Camera permission denied');
-      }
-    } catch (err) {
-      console.warn(err);
-    }
-  };
 }
 
 const styles = StyleSheet.create({

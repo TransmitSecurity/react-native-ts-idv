@@ -14,7 +14,12 @@ Pod::Spec.new do |s|
   s.platforms    = { :ios => min_ios_version_supported }
   s.source       = { :git => "https://github.com/TransmitSecurity/react-native-ts-idv.git", :tag => "#{s.version}" }
 
-  s.dependency 'IdentityVerification', '~> 1.2.10'
+  # Exact pin, matching Android's exact com.ts.sdk:identityverification:1.3.5. Both platforms
+  # then run the one native version this plugin release was tested against. Consequence for
+  # integrators: an app cannot pick up an IdentityVerification patch release (or pin one) without
+  # a new plugin release, and a Podfile that already pins another IdentityVerification version
+  # will fail to resolve.
+  s.dependency 'IdentityVerification', '1.3.5'
   s.source_files = "ios/**/*.{h,m,mm,swift}"
 
   # Use install_modules_dependencies helper to install the dependencies if React Native version >=0.71.0.

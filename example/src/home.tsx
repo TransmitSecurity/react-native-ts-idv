@@ -6,10 +6,11 @@ export type Props = {
     onStartFaceAuth: () => void;
     onStartMosaicUI: () => void;
     isInSession: boolean;
+    sessionId: string | null;
     errorMessage: string;
 };
 
-const HomeScreen: React.FC<Props> = ({ onStartIDV, onStartFaceAuth, onStartMosaicUI, isInSession, errorMessage }) => {
+const HomeScreen: React.FC<Props> = ({ onStartIDV, onStartFaceAuth, onStartMosaicUI, isInSession, sessionId, errorMessage }) => {
 
     return (
         <View style={styles.container}>
@@ -17,9 +18,19 @@ const HomeScreen: React.FC<Props> = ({ onStartIDV, onStartFaceAuth, onStartMosai
             { renderStartIDVWithMosaicUIButton() }
             { renderStartIDVButton() }
             { renderStartFaceAuthVButton() }
+            { renderSessionLabel() }
             { renderStatusLabel() }
         </View>
     );
+
+    function renderSessionLabel(): ReactElement {
+        if (!sessionId) { return <></> }
+        return (
+            <View style={{marginTop: 24}}>
+                <Text style={styles.sessionLabel} selectable>{`Session ID: ${sessionId}`}</Text>
+            </View>
+        )
+    }
 
     function renderStatusLabel(): ReactElement {
         return (
@@ -78,6 +89,11 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         textAlign: 'center',
         color: 'red',
+    },
+    sessionLabel: {
+        fontSize: 14,
+        textAlign: 'center',
+        color: 'black',
     },
     sectionTitle: {
         fontSize: 24,
